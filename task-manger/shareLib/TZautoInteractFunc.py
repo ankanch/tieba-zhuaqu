@@ -57,6 +57,8 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
             TZIC.clientInterreactiveSend(conn,cmd)
             got,data = TZDF.getPerferResponse(TZDS.OK,conn)   #perfer: OK
             if got == True:
+                #下面的代码存在问题：代码用途：爬虫在线测试（暂时取消该模块）
+                """
                 print("\t\t\tJob Confirmed by Admin\n\t\t\tstart running online crawler test")
                 onlinecount = onlineTestCralwer()
                 print("\t\t\tcralwers online :",onlinecount)
@@ -64,8 +66,12 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
                     cmd = TZDF.makeUpCommand(TZDS.ERROR,["No Crawler online!"])
                     print("cmd to echo:",cmd)
                     return cmd
-                avergepage = Pages / onlinecount
-                print("\t\t\allocate job...")
+                """
+                #先假设所有爬虫都是在线的
+                onlinecount = len(crawlerlist)
+                print("\t\t\tJob Confirmed by Admin.")
+                avergepage = int(Pages / onlinecount)
+                print("\t\tallocate job...")
                 allocateJobs(TiebaName,avergepage,onlinecount)
                 print("\t\t\tjob allocate done!")
             else:
@@ -87,6 +93,7 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
     elif cmd_head == TZDS.FACTORY_TEST:
             cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,["成都信息工程大学","0","8"])
             print("--TEST MODE---")
+    #print("\t\t\tautoInteract() return with cmd:",cmd)
     return cmd
 
 
@@ -200,7 +207,8 @@ def Updata():
     setDate(TZDS.DATA_TOTAL_AVERAGE_STATUS,sum)
 
 
-#检测多少爬虫在线的函数
+#检测多少爬虫在线的函数**存在问题，以后完成**
+"""
 def onlineTestCralwer():
     clist = getData(TZDS.DATA_CRAWLER_LIST)
     xpos = 0
@@ -217,13 +225,16 @@ def onlineTestCralwer():
     setDate(TZDS.DATA_CRAWLER_LIST,clist)
     print("\t\t\tCrawler Online Check Result:",xpos - notonline," of ",xpos,"crawlers online")
     return xpos - notonline
+"""
 
 #向每个爬虫分配任务
 def allocateJobs(tiebaname,avpages,onlinecount):
     clist = getData(TZDS.DATA_CRAWLER_LIST)
     failed = []
-    cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,[tiebaname,0,avpages])
+    aledpages = 0
     for crawler in clist:
+        cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,[tiebaname,aledpages,avpages])
+        aledpages+=avpages
         crawler[3].sendall(cmd.encode("utf-8")) 
         data=crawler[3].recv(1024)
         data = data.decode("utf-8") 
@@ -232,8 +243,10 @@ def allocateJobs(tiebaname,avpages,onlinecount):
             print("\t\t\tcrawler #",crawler[0]," confirmed job")
         else:
             print("\t\t\tcrawler #",crawler[0]," failed to confirmed job,retry later")
+            crawler.append(aledpages-avpages)
             failed.append(crawler)
     while len(failed) > 0:
+        cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,[tiebaname,failed[0][4],avpages])
         failed[0][3].sendall(cmd.encode("utf-8")) 
         data=failed[0][3].recv(1024)
         data = data.decode("utf-8") 

@@ -73,13 +73,14 @@ while TMCMD != TZDS.JOB_CONFIRM:
         data = data.decode("utf-8")
         print("data=",data)
         TMCMD = int(TZDF.resolveCommand(data)[0])
-        if TMCMD == TZDS.ONLINE_ECHO:
-            s.sendall("666,CRAWLER oNLINE - > CONFRIM".encode("utf-8"))
+        #下面的代码用于在线测试，但存在问题， 故暂时取消在线测试，直接接受任务清单，以后完善
+        """if TMCMD == TZDS.ONLINE_ECHO:
             s.sendall("666,CRAWLER oNLINE - > CONFRIM".encode("utf-8"))
             data=s.recv(1024)
             data = data.decode("utf-8")
             print("data(in RMCMD=ONLINE_ECHO)=",data)
             TMCMD = int(TZDF.resolveCommand(data)[0]) 
+        """
     except:
         pass
 s.sendall("666,job comfirm".encode("utf-8"))
@@ -150,4 +151,5 @@ s.sendall(FILESENDCMD.encode("utf-8"))
 data=s.recv(1024)  
 data = data.decode("utf-8")
 print("任务完成！爬虫初始状态，准备下次任务。")
-os.system('python crawlerMain.py')
+s.sendall("102,crawler offline:job_finished".encode("utf-8"))  
+os.system('python online-crawler-test.py')

@@ -58,7 +58,9 @@ def closeConnection(conn):
     conn.close()
 
 
-#一次握手函数
+
+#一次握手函数**这里存在问题**
+"""
 def shakeHand(crawlerdata,cmd="502,connection test"):
     s = crawlerdata[3]
     print("11111")
@@ -76,4 +78,5 @@ def shakeHand(crawlerdata,cmd="502,connection test"):
         print("\t\t\tERROR:crawler #",crawlerdata[0],"is offline:",e)    
         return False
     print("6666666")
-
+    return False
+"""
