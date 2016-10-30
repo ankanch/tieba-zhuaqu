@@ -60,16 +60,20 @@ def closeConnection(conn):
 
 #一次握手函数
 def shakeHand(crawlerdata,cmd="502,connection test"):
-    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    s = crawlerdata[3]
+    print("11111")
     try:
-        s.connect((crawlerdata[1],int(crawlerdata[2]))) #ID,IP,PORT
-        s.sendall(cmd.encode("utf-8"))  
+        print("222222")
+        s.sendall(cmd.encode("utf-8"))
+        print("333333")  
         data=s.recv(1024)
+        print("4444444")
         data = data.decode("utf-8")
         print("\t\t\tcrawler #",crawlerdata[0],":",data)    
-        s.close()
         return True
     except Exception as e:
-        print(e)    
+        print("5555555")
+        print("\t\t\tERROR:crawler #",crawlerdata[0],"is offline:",e)    
         return False
+    print("6666666")
 

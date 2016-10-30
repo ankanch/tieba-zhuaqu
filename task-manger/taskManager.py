@@ -29,8 +29,8 @@ def Interactive(conn,ct,nct,crawlist):
             if TZIF.CheckAdmin(int(relcmd[0])) == True:
                 ADMINCONVERSITION = True
         if(int(relcmd[0]) != TZDS.ADMIN_JOBCREATE):
-            showMsg("\tClient #"+ str(ct+1) +":"+ str(data))
-            print("\t\t\trelcmd",relcmd)
+            showMsg("\tInteractive:Client #"+ str(ct+1) +":"+ str(data))
+            print("\t\t\tInteractive:relcmd",relcmd)
         else:
             print("JOB RECIVED!")
         if(int(relcmd[0]) == TZDS.FINISH ):
@@ -66,7 +66,7 @@ os.system('clear')
 sic = TZIC.SIC()   #网络操作对象
 
 #关键变量
-CRAWLER_LIST = []   #存放当前已经连线的爬虫  #ID,IP,PORT
+CRAWLER_LIST = []   #存放当前已经连线的爬虫  #ID,IP,PORT,connection socket
 
 showMsg("initial service...")
 t = {}

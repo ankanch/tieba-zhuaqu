@@ -16,7 +16,7 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
     if cmd_head == TZDS.FINISH:    #完成交互，暂时断线
         cmd = TZDF.makeUpCommand(TZDS.OKCLOSE,["crawler has been temparily disconnect to the server"])
     elif cmd_head == TZDS.REGISTE:  #将爬虫注册至服务器
-        crawlerlist.append([str(crawlerid),str(relcmd[1]),int(relcmd[2])])
+        crawlerlist.append([str(crawlerid),str(relcmd[1]),int(relcmd[2]),conn])
         setDate(TZDS.DATA_CRAWLER_LIST,crawlerlist)
         cmd = TZDF.makeUpCommand(TZDS.ONLINE_ECHO,[crawlerid,"crawler has been registe to server"])
         TZIC.clientInterreactiveSend(conn,cmd)
@@ -34,7 +34,10 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
         sum = getData(TZDS.DATA_TOTAL_AVERAGE_STATUS)
         cmd = TZDF.makeUpCommand(TZDS.OK,[str(sum),"server total task status sended"])
     elif cmd_head == TZDS.ADMIN_CRAWLER_LIST:   #从服务器端获取在线爬虫列表
-        strIDList = str(crawlerlist)
+        strIDList = []
+        for item in crawlerlist:
+            strIDList.append( [item[0],item[1],item[2]] )
+        strIDList = str(strIDList)
         strIDList = strIDList.replace(",","@")
         strIDList = strIDList.replace("[","")
         strIDList = strIDList.replace("]","")
@@ -219,15 +222,23 @@ def onlineTestCralwer():
 def allocateJobs(tiebaname,avpages,onlinecount):
     clist = getData(TZDS.DATA_CRAWLER_LIST)
     failed = []
-    cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,[tiebaname,avpages])
+    cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,[tiebaname,0,avpages])
     for crawler in clist:
-        if TZIC.shakeHand(crawler,cmd) == True:
+        crawler[3].sendall(cmd.encode("utf-8")) 
+        data=crawler[3].recv(1024)
+        data = data.decode("utf-8") 
+        TMCMD = int(TZDF.resolveCommand(data)[0]) 
+        if TMCMD == TZDS.OK:
             print("\t\t\tcrawler #",crawler[0]," confirmed job")
         else:
             print("\t\t\tcrawler #",crawler[0]," failed to confirmed job,retry later")
             failed.append(crawler)
     while len(failed) > 0:
-        if TZIC.shakeHand(failed[0],cmd) == True:
+        failed[0][3].sendall(cmd.encode("utf-8")) 
+        data=failed[0][3].recv(1024)
+        data = data.decode("utf-8") 
+        TMCMD = int(TZDF.resolveCommand(data)[0]) 
+        if TMCMD == TZDS.OK:
             print("\t\t\tcrawler #",crawler[0]," retried : confirmed job")
             del failed[0]
     print("TZ TaskManager: Jobs has been allocate to ",onlinecount,"crawlers")
