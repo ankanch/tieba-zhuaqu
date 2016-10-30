@@ -4,7 +4,6 @@ import os
 import sys
 import time
 import threading
-import dataminer
 import pickle
 import datetime
 import socket
@@ -108,7 +107,7 @@ t = []
 x = 0
 deltaX = MAX_PAGE / TT.GV_THEAD_COUNT
 BEG = BEGING_PAGE
-END = deltaX
+END = BEGING_PAGE + deltaX
 while x < TT.GV_THEAD_COUNT:
     tn = threading.Thread(target=TT.downloadPage,args=(int(END),x+1,begURL,int(BEG),))
     t.append(tn)

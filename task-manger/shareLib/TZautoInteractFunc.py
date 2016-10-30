@@ -232,10 +232,17 @@ def allocateJobs(tiebaname,avpages,onlinecount):
     clist = getData(TZDS.DATA_CRAWLER_LIST)
     failed = []
     aledpages = 0
+    i=0
+    sum = len(clist)
     for crawler in clist:
-        cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,[tiebaname,aledpages,avpages])
+        i+=1
+        print("\t\t\tAllocating for #",i," / ",sum," crawler...")
+        cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,[tiebaname,aledpages,aledpages + avpages])
         aledpages+=avpages
-        crawler[3].sendall(cmd.encode("utf-8")) 
+        crawler[3].sendall(cmd.encode("utf-8"))
+        #下面的代码是用来对爬虫的任务确认消息进行二次确认的，存在问题
+        #貌似这种recv的方式会直接跳出这个函数回到interactive函数里面去？所以暂时取消
+        """ 
         data=crawler[3].recv(1024)
         data = data.decode("utf-8") 
         TMCMD = int(TZDF.resolveCommand(data)[0]) 
@@ -254,6 +261,7 @@ def allocateJobs(tiebaname,avpages,onlinecount):
         if TMCMD == TZDS.OK:
             print("\t\t\tcrawler #",crawler[0]," retried : confirmed job")
             del failed[0]
+    """
     print("TZ TaskManager: Jobs has been allocate to ",onlinecount,"crawlers")
 
 

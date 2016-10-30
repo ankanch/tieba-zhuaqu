@@ -4,7 +4,6 @@ import os
 import sys
 import time
 import threading
-import dataminer
 import pickle
 import datetime
 import socket
@@ -66,7 +65,7 @@ data=s.recv(1024)
 data = data.decode("utf-8")
 TMCMD = int(TZDF.resolveCommand(data)[0])
 print ("等待任务分配中...")
-s.sendall("700".encode("utf-8"))    #发送任务测试命令
+#s.sendall("700".encode("utf-8"))    #发送任务测试命令
 while TMCMD != TZDS.JOB_CONFIRM:
     try:
         data=s.recv(1024)
@@ -98,7 +97,7 @@ t = []
 x = 0
 deltaX = MAX_PAGE / TT.GV_THEAD_COUNT
 BEG = BEGING_PAGE
-END = deltaX
+END = BEGING_PAGE + deltaX
 while x < TT.GV_THEAD_COUNT:
     tn = threading.Thread(target=TT.downloadPage,args=(int(END),x+1,begURL,int(BEG),))
     t.append(tn)

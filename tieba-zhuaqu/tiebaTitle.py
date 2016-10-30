@@ -26,7 +26,7 @@ def setupfiles():
     if os.path.exists('C:\\ktieba\\result_add') == False:
         f = open('C:\\ktieba\\result_add','w')
     if os.path.exists('C:\\ktieba\\ignoreWords') == False:
-        f = open('\\data\\ignoreWords','w')
+        f = open('C:\\ktieba\\ignoreWords','w')
     GV_FINISHED_COUNT.append(0)
 
 

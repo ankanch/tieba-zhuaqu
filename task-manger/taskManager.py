@@ -14,6 +14,7 @@ def Interactive(conn,ct,nct,crawlist):
     TZIF.setDate(TZDS.DATA_CRAWLER_STATUS,0.0,int(nct))
     FIRSTRUN = True
     ADMINCONVERSITION = False
+    IS_ADMIN = False  #用来关闭回显
     while 1:
         data = TZIC.clientInterreactiveRecv(conn)
         if len(data) < 3:
@@ -25,10 +26,11 @@ def Interactive(conn,ct,nct,crawlist):
                 break
         cmd = TZDF.findMatchCommand(data)
         relcmd = TZDF.resolveCommand(data)
+        IS_ADMIN = TZIF.CheckAdmin(int(relcmd[0]))
         if FIRSTRUN == True:
             if TZIF.CheckAdmin(int(relcmd[0])) == True:
                 ADMINCONVERSITION = True
-        if(int(relcmd[0]) != TZDS.ADMIN_JOBCREATE):
+        if(int(relcmd[0]) != TZDS.ADMIN_JOBCREATE and IS_ADMIN == False ):
             showMsg("\tInteractive:Client #"+ str(ct+1) +":"+ str(data))
             print("\t\t\tInteractive:relcmd",relcmd)
         else:
@@ -55,10 +57,10 @@ def Interactive(conn,ct,nct,crawlist):
         cmd = TZIF.autoInteract(relcmd,conn,nct,crawlist)
         TZIC.clientInterreactiveSend(conn,str(cmd))
     TZIC.closeConnection(conn)
-    showMsg("\tClient #"+ str(ct+1) +": connection closed.")
     del t[nct]
     count[0]-=1
-    showMsg("\tClient #"+ str(ct+1) +": resource cleaned.")
+    if( IS_ADMIN == False):
+        showMsg("\tClient #"+ str(ct+1) +": connection closed,resource cleaned")
 
 
 os.system('clear')
