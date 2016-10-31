@@ -16,7 +16,7 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
     if cmd_head == TZDS.FINISH:    #完成交互，暂时断线
         cmd = TZDF.makeUpCommand(TZDS.OKCLOSE,["crawler has been temparily disconnect to the server"])
     elif cmd_head == TZDS.REGISTE:  #将爬虫注册至服务器
-        crawlerlist.append([str(crawlerid),str(relcmd[1]),int(relcmd[2])])
+        crawlerlist.append([str(crawlerid),str(relcmd[1]),int(relcmd[2]),conn])
         setDate(TZDS.DATA_CRAWLER_LIST,crawlerlist)
         cmd = TZDF.makeUpCommand(TZDS.ONLINE_ECHO,[crawlerid,"crawler has been registe to server"])
         TZIC.clientInterreactiveSend(conn,cmd)
@@ -34,7 +34,10 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
         sum = getData(TZDS.DATA_TOTAL_AVERAGE_STATUS)
         cmd = TZDF.makeUpCommand(TZDS.OK,[str(sum),"server total task status sended"])
     elif cmd_head == TZDS.ADMIN_CRAWLER_LIST:   #从服务器端获取在线爬虫列表
-        strIDList = str(crawlerlist)
+        strIDList = []
+        for item in crawlerlist:
+            strIDList.append( [item[0],item[1],item[2]] )
+        strIDList = str(strIDList)
         strIDList = strIDList.replace(",","@")
         strIDList = strIDList.replace("[","")
         strIDList = strIDList.replace("]","")
@@ -54,6 +57,8 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
             TZIC.clientInterreactiveSend(conn,cmd)
             got,data = TZDF.getPerferResponse(TZDS.OK,conn)   #perfer: OK
             if got == True:
+                #下面的代码存在问题：代码用途：爬虫在线测试（暂时取消该模块）
+                """
                 print("\t\t\tJob Confirmed by Admin\n\t\t\tstart running online crawler test")
                 onlinecount = onlineTestCralwer()
                 print("\t\t\tcralwers online :",onlinecount)
@@ -61,8 +66,12 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
                     cmd = TZDF.makeUpCommand(TZDS.ERROR,["No Crawler online!"])
                     print("cmd to echo:",cmd)
                     return cmd
-                avergepage = Pages / onlinecount
-                print("\t\t\allocate job...")
+                """
+                #先假设所有爬虫都是在线的
+                onlinecount = len(crawlerlist)
+                print("\t\t\tJob Confirmed by Admin.")
+                avergepage = int(Pages / onlinecount)
+                print("\t\tallocate job...")
                 allocateJobs(TiebaName,avergepage,onlinecount)
                 print("\t\t\tjob allocate done!")
             else:
@@ -84,6 +93,7 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
     elif cmd_head == TZDS.FACTORY_TEST:
             cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,["成都信息工程大学","0","8"])
             print("--TEST MODE---")
+    #print("\t\t\tautoInteract() return with cmd:",cmd)
     return cmd
 
 
@@ -173,7 +183,11 @@ def getData(strname,crawlerid=-1):
     if strname == TZDS.DATA_CRAWLER_STATUS:
         return dataPackage[TZDS.DATA_CRAWLER_STATUS][crawlerid]
     else:
-        return dataPackage[strname]
+        try:
+            return dataPackage[strname]
+        except Exception:
+            print("ERROR:",strname,"no attribute!")
+            return []
 
 def delData(strname,crawlerid):
     if strname == TZDS.DATA_CRAWLER_STATUS:
@@ -193,7 +207,8 @@ def Updata():
     setDate(TZDS.DATA_TOTAL_AVERAGE_STATUS,sum)
 
 
-#检测多少爬虫在线的函数
+#检测多少爬虫在线的函数**存在问题，以后完成**
+"""
 def onlineTestCralwer():
     clist = getData(TZDS.DATA_CRAWLER_LIST)
     xpos = 0
@@ -210,22 +225,43 @@ def onlineTestCralwer():
     setDate(TZDS.DATA_CRAWLER_LIST,clist)
     print("\t\t\tCrawler Online Check Result:",xpos - notonline," of ",xpos,"crawlers online")
     return xpos - notonline
+"""
 
 #向每个爬虫分配任务
 def allocateJobs(tiebaname,avpages,onlinecount):
     clist = getData(TZDS.DATA_CRAWLER_LIST)
     failed = []
-    cmd = TZDF.makeUpCommand(TZDS.JOB_ALLOCATION,[tiebaname,avpages])
+    aledpages = 0
+    i=0
+    sum = len(clist)
     for crawler in clist:
-        if TZIC.shakeHand(crawler,cmd) == True:
+        i+=1
+        print("\t\t\tAllocating for #",i," / ",sum," crawler...")
+        cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,[tiebaname,aledpages,aledpages + avpages])
+        aledpages+=avpages
+        crawler[3].sendall(cmd.encode("utf-8"))
+        #下面的代码是用来对爬虫的任务确认消息进行二次确认的，存在问题
+        #貌似这种recv的方式会直接跳出这个函数回到interactive函数里面去？所以暂时取消
+        """ 
+        data=crawler[3].recv(1024)
+        data = data.decode("utf-8") 
+        TMCMD = int(TZDF.resolveCommand(data)[0]) 
+        if TMCMD == TZDS.OK:
             print("\t\t\tcrawler #",crawler[0]," confirmed job")
         else:
             print("\t\t\tcrawler #",crawler[0]," failed to confirmed job,retry later")
+            crawler.append(aledpages-avpages)
             failed.append(crawler)
     while len(failed) > 0:
-        if TZIC.shakeHand(failed[0],cmd) == True:
+        cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,[tiebaname,failed[0][4],avpages])
+        failed[0][3].sendall(cmd.encode("utf-8")) 
+        data=failed[0][3].recv(1024)
+        data = data.decode("utf-8") 
+        TMCMD = int(TZDF.resolveCommand(data)[0]) 
+        if TMCMD == TZDS.OK:
             print("\t\t\tcrawler #",crawler[0]," retried : confirmed job")
             del failed[0]
+    """
     print("TZ TaskManager: Jobs has been allocate to ",onlinecount,"crawlers")
 
 
