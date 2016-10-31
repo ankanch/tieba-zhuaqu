@@ -65,4 +65,6 @@ public:
 private:
 	bool firstrun;
 	
+public:
+	afx_msg void OnBnClickedButtonDownloadResultFile();
 };
