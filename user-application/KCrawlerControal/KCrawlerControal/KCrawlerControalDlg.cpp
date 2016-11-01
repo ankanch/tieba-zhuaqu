@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CKCCDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON_CREATEJOB, &CKCCDlg::OnBnClickedButtonCreatejob)
 	ON_MESSAGE(WM_UPDATE_CRAWLER_LIST,onLoadCrawlerList)
+	ON_MESSAGE(WM_DOWNLOAD_RESULT,onDownloadResultMsg)
 	ON_BN_CLICKED(IDC_BUTTON_DOWNLOAD_RESULT_FILE, &CKCCDlg::OnBnClickedButtonDownloadResultFile)
 END_MESSAGE_MAP()
 
@@ -107,6 +108,7 @@ BOOL CKCCDlg::OnInitDialog()
 	AfxSocketInit();
 	firstrun = true;
 	// TODO: 在此添加额外的初始化代码
+	loadConfig();
 	InitEnvirment();
 	LoadCrawlerList();
 	//循环加载爬虫列表
@@ -114,6 +116,8 @@ BOOL CKCCDlg::OnInitDialog()
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
+
+int CKCCDlg::DATA_REFRESH_RATE = 5;
 
 void CKCCDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
@@ -188,9 +192,103 @@ void CKCCDlg::OnBnClickedButtonCreatejob()
 
 LRESULT  CKCCDlg::onLoadCrawlerList(WPARAM WP, LPARAM LP)
 {
+	if (DEBUG_MODE)
+	{
+		return 0;
+	}
 	LoadCrawlerList();
 	return 0;
 }
+
+LRESULT CKCCDlg::onDownloadResultMsg(WPARAM WP, LPARAM LP)
+{
+	CSocket s;
+	s.Socket();
+	if (!s.Connect(DATA_SERVER_IP, DATA_SERVER_PORT))
+	{
+		KCCLog(_T("错误：无法连接到TaskManager服务器！请检查你的网络连接后重试！"));
+		return 0;
+	}
+	KCCLog(_T("连接中..."));
+	CString RESULT_TRANSFER_CMD = _T("304,REQUEST FOR JOB RESULT");
+	USES_CONVERSION;
+	char *cmdbuf = T2A(RESULT_TRANSFER_CMD);
+	cmdbuf = UnicodeToUTF8(RESULT_TRANSFER_CMD.GetBuffer(0));
+	s.Send(cmdbuf, strlen(cmdbuf));
+	KCCLog(_T("请求已发送，等待TaskManager服务器响应..."));
+	CString cp;
+	char recvBuf[1024] = { 0 };
+	s.Receive((void *)recvBuf, 1024);
+	cp = UTF8_TO_GBK(recvBuf);
+	KCCLog(_T("TaskManager:" + cp));
+	//开始接收文件
+	//首先得到文件大小
+	memset(recvBuf, 0, sizeof(char) * 1024);
+	s.Receive((void *)recvBuf, 1024);
+	cp = UTF8_TO_GBK(recvBuf);
+	KCCLog(_T("TaskManager:->result file size:" + cp));
+	int filesize = _ttoi(cp);
+	//然后开始接收
+	CString filedata = _T("");
+	int recivedsize = 0;
+	KCCLog(_T("下载中...."));
+	while (recivedsize < filesize)
+	{
+		memset(recvBuf, 0, sizeof(char) * 1024);
+		int rs = s.Receive((void *)recvBuf, 1024);
+		cp = UTF8_TO_GBK(recvBuf);
+		filedata += cp;
+		recivedsize += rs;
+	}
+	KCCLog(_T("任务结果下载完毕！"));
+	s.Close();
+	CFile re;
+	re.Open(_T("result"), CFile::modeCreate | CFile::modeWrite);
+	re.Write(cp.GetBuffer(0), cp.GetLength());
+	re.Close();
+	return 0;
+}
+
+void CKCCDlg::loadConfig()
+{
+	CStdioFile cfg;
+	cfg.Open(PATH_CONFIG_FILE,CFile::modeRead);
+	CString line = _T("");
+	while (cfg.ReadString(line))
+	{
+		//MessageBox(line);
+		if(line.Find(_T("SERVER_HOST")) >= 0){
+			//读取服务器地址
+			DATA_SERVER_IP = line.Right(line.GetLength() - line.Find(_T("=")) - 1);
+		}
+		else if(line.Find(_T("SERVER_PORT")) >= 0) {
+			//读取端口
+			DATA_SERVER_PORT = _ttoi(line.Right(line.GetLength() - line.Find(_T("=")) - 1));
+			if (DATA_SERVER_PORT > 65536)
+			{
+				DATA_SERVER_PORT = 50005;
+			}
+		}
+		else if(line.Find(_T("REFRESH_RATE")) >= 0) {
+			//读取更新爬虫列表频率
+			DATA_REFRESH_RATE = _ttoi(line.Right(line.GetLength() - line.Find(_T("=")) - 1));
+			if (DATA_REFRESH_RATE < 3)
+			{
+				DATA_REFRESH_RATE = 5;
+			}
+		}
+		else if(line.Find(_T("MODE_DEBUG")) >= 0) {
+			//是否开启调试模式
+			if (line.Right(line.GetLength() - line.Find(_T("=")) - 1) == _T("TRUE"))
+			{
+				DEBUG_MODE = true;
+			}
+		}
+		line = _T("");
+	}
+	cfg.Close();
+}
+
 
 void CKCCDlg::KCCLog(const CString logdata)
 {
@@ -327,12 +425,22 @@ UINT  CKCCDlg::LoopLoadCrawlerList(LPVOID pParam)
 	}
  	while (true)
 	{
-		Sleep(5000);
+		Sleep(1000*DATA_REFRESH_RATE);
 		::PostMessage(TH,WM_UPDATE_CRAWLER_LIST,NULL,NULL);
 	}
 	return 0;
 }
 
+UINT  CKCCDlg::DownloadResultNewThread(LPVOID pParam)
+{
+	HWND TH = (HWND)pParam;
+	if (TH == nullptr)
+	{
+		return -1;  //-1 = 空指针
+	}
+	::PostMessage(TH, WM_DOWNLOAD_RESULT, NULL, NULL);
+	return 0;
+}
 
 const wchar_t*  CKCCDlg::UTF8_TO_GBK(const char* str)
 {//
@@ -360,6 +468,7 @@ char * CKCCDlg::UnicodeToUTF8(const wchar_t *str)
 
 void CKCCDlg::OnBnClickedButtonDownloadResultFile()
 {
+	/*/
 	// TODO: 在此添加控件通知处理程序代码
 	CSocket s;
 	s.Socket();
@@ -402,4 +511,6 @@ void CKCCDlg::OnBnClickedButtonDownloadResultFile()
 	KCCLog(_T("任务结果下载完毕！"));
 
 	s.Close();
+	/*/
+	AfxBeginThread(DownloadResultNewThread, AfxGetMainWnd()->m_hWnd);
 }
