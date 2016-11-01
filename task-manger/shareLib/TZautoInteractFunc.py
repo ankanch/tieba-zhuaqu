@@ -80,8 +80,8 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
             cmd = TZDF.makeUpCommand(TZDS.ERROR,["ADMIN IDENTIFY FAILED!"])
     elif cmd_head == TZDS.ADMIN_JOBTRANSFER:    #传送所有抓取结果至admin端
         gatherSubjobs()
-        cmd = TZDF.makeUpCommand(TZDS.OK,["start transfer..."])
-        TZIC.clientInterreactiveSend(conn,cmd)
+        #cmd = TZDF.makeUpCommand(TZDS.OK,["start transfer..."])
+        #TZIC.clientInterreactiveSend(conn,cmd)
         sendFile(conn,"/../tieba-zhuaqu/reciveCache/tresult.txt")
         cmd = TZDF.makeUpCommand(TZDS.START_TRANSFER,["transfer done"])
     elif cmd_head == TZDS.ADMIN_SHUTDOWN:   #关闭任务管理服务器
@@ -271,10 +271,11 @@ def gatherSubjobs():
     tgfile = open("/../tieba-zhuaqu/reciveCache/tresult.txt","w")
     tgfile.truncate()
     tgfile.close()
-    tgfile = open("/../tieba-zhuaqu/reciveCache/tresult.txt","a")
+    tgfile = open("/../tieba-zhuaqu/reciveCache/tresult.txt","ab")
     for f in flist:
-        fa = open("/../tieba-zhuaqu/reciveCache/"+f,"r",encoding="utf-8",errors="ignore")
+        fa = open("/../tieba-zhuaqu/reciveCache/"+f,"rb")
         data = fa.read()#.decode('utf8', 'ignore')
+        #print(data)
         tgfile.write(data)
         fa.close()
     tgfile.close()

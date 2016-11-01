@@ -232,19 +232,19 @@ LRESULT CKCCDlg::onDownloadResultMsg(WPARAM WP, LPARAM LP)
 	CString filedata = _T("");
 	int recivedsize = 0;
 	KCCLog(_T("下载中...."));
+	CFile re;
+	re.Open(_T("result"), CFile::modeCreate | CFile::modeWrite | CFile::typeBinary);
 	while (recivedsize < filesize)
 	{
 		memset(recvBuf, 0, sizeof(char) * 1024);
 		int rs = s.Receive((void *)recvBuf, 1024);
+		re.Write(recvBuf,rs);
 		cp = UTF8_TO_GBK(recvBuf);
 		filedata += cp;
 		recivedsize += rs;
 	}
 	KCCLog(_T("任务结果下载完毕！"));
 	s.Close();
-	CFile re;
-	re.Open(_T("result"), CFile::modeCreate | CFile::modeWrite);
-	re.Write(cp.GetBuffer(0), cp.GetLength());
 	re.Close();
 	return 0;
 }
@@ -468,49 +468,5 @@ char * CKCCDlg::UnicodeToUTF8(const wchar_t *str)
 
 void CKCCDlg::OnBnClickedButtonDownloadResultFile()
 {
-	/*/
-	// TODO: 在此添加控件通知处理程序代码
-	CSocket s;
-	s.Socket();
-	if (!s.Connect(DATA_SERVER_IP, DATA_SERVER_PORT))
-	{
-		KCCLog(_T("错误：无法连接到TaskManager服务器！请检查你的网络连接后重试！"));
-		return ;
-	}
-	KCCLog(_T("连接中..."));
-	CString RESULT_TRANSFER_CMD = _T("304,REQUEST FOR JOB RESULT");
-	USES_CONVERSION;
-	char *cmdbuf = T2A(RESULT_TRANSFER_CMD);
-	cmdbuf = UnicodeToUTF8(RESULT_TRANSFER_CMD.GetBuffer(0));
-	s.Send(cmdbuf, strlen(cmdbuf));
-	KCCLog(_T("请求已发送，等待TaskManager服务器响应..."));
-	CString cp;
-	char recvBuf[1024] = { 0 };
-	s.Receive((void *)recvBuf, 1024);
-	cp = UTF8_TO_GBK(recvBuf);
-	KCCLog(_T("TaskManager:" + cp));
-	//开始接收文件
-	//首先得到文件大小
-	memset(recvBuf, 0, sizeof(char) * 1024);
-	s.Receive((void *)recvBuf, 1024);
-	cp = UTF8_TO_GBK(recvBuf);
-	KCCLog(_T("TaskManager:->result file size:" + cp));
-	int filesize = _ttoi(cp);
-	//然后开始接收
-	CString filedata = _T("");
-	int recivedsize = 0;
-	KCCLog(_T("下载中...."));
-	while (recivedsize < filesize)
-	{
-		memset(recvBuf, 0, sizeof(char) * 1024);
-		int rs = s.Receive((void *)recvBuf, 1024);
-		cp = UTF8_TO_GBK(recvBuf);
-		filedata += cp;
-		recivedsize += rs;
-	}
-	KCCLog(_T("任务结果下载完毕！"));
-
-	s.Close();
-	/*/
 	AfxBeginThread(DownloadResultNewThread, AfxGetMainWnd()->m_hWnd);
 }
