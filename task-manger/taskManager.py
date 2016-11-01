@@ -5,6 +5,10 @@ import shareLib.TZDatagramSymbol as TZDS
 import shareLib.TZDatagramFunc as TZDF
 import shareLib.TZautoInteractFunc as TZIF
 
+#SERVER_HOST = "216.45.55.153"   #private python VPS
+SERVER_HOST = "172.31.24.123"    #amazon ECS
+SERVER_PORT = 50005
+
 def showMsg(msg):
     print("TZ TaskManager:",msg)
 
@@ -78,7 +82,7 @@ count.append(0)
 SERVER_SHUTDOWN = []
 SERVER_SHUTDOWN.append(False)
 TZIF.InitDataExchangeTZautoInteractFunc()   
-sic.setInfo("216.45.55.153",50005)
+sic.setInfo(SERVER_HOST,SERVER_PORT)
 showMsg("starting server...")
 sic.startServer(10)
 showMsg("server started successfully\twating for connection...")

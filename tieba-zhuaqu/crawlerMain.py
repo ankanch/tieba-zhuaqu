@@ -15,7 +15,8 @@ import shareLib.TZInternetCommunication as TZIC
 #==============基本数据=======================================================
 
 #TaskManager服务器
-HOST='216.45.55.153'
+#HOST='216.45.55.153'
+HOST = "ec2-54-238-242-34.ap-northeast-1.compute.amazonaws.com"    #amazon ECS
 PORT=50005
 
 #贴吧BASE URL
@@ -30,7 +31,7 @@ TT.setupfiles()
 os.system('cls')
 #连接服务器
 print('Tieba-zhuaqu 这是一个抓取贴吧数据的分布式爬虫\npowered by kanch \n kanchisme@gmail.com\n')
-print('>>>>>启动爬虫....\n>>>>>连接TaskManager服务器中...')
+print('>>>>>启动爬虫....\n>>>>>目标服务器：',HOST,'\n>>>>>连接TaskManager服务器中...')
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 CS = True
 while CS:

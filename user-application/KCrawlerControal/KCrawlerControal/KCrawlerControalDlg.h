@@ -45,7 +45,8 @@ public:
 //自己添加的函数和变量
 public:
 	//变量
-	CString DATA_SERVER_IP = _T("216.45.55.153");
+	//CString DATA_SERVER_IP = _T("216.45.55.153");
+	CString DATA_SERVER_IP = _T("ec2-54-238-242-34.ap-northeast-1.compute.amazonaws.com");  //amazon ECS
 	int DATA_SERVER_PORT = 50005;
 	// 日志编辑框变量
 	CEdit m_edit_log;

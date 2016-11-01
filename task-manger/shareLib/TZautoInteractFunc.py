@@ -273,8 +273,8 @@ def gatherSubjobs():
     tgfile.close()
     tgfile = open("/../tieba-zhuaqu/reciveCache/tresult.txt","a")
     for f in flist:
-        fa = open("/../tieba-zhuaqu/reciveCache/"+f,"r")
-        data = fa.read()
+        fa = open("/../tieba-zhuaqu/reciveCache/"+f,"r",encoding="utf-8",errors="ignore")
+        data = fa.read()#.decode('utf8', 'ignore')
         tgfile.write(data)
         fa.close()
     tgfile.close()
