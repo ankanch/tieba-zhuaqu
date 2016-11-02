@@ -7,6 +7,7 @@
 #include "KCrawlerControalDlg.h"
 #include "afxdialogex.h"
 #include "CreateJobDlg.h"
+#include "KCCPlugins.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -71,6 +72,7 @@ BEGIN_MESSAGE_MAP(CKCCDlg, CDialogEx)
 	ON_MESSAGE(WM_UPDATE_CRAWLER_LIST,onLoadCrawlerList)
 	ON_MESSAGE(WM_DOWNLOAD_RESULT,onDownloadResultMsg)
 	ON_BN_CLICKED(IDC_BUTTON_DOWNLOAD_RESULT_FILE, &CKCCDlg::OnBnClickedButtonDownloadResultFile)
+	ON_BN_CLICKED(IDC_BUTTON_LOADANALY, &CKCCDlg::OnBnClickedButtonLoadanaly)
 END_MESSAGE_MAP()
 
 
@@ -469,4 +471,12 @@ char * CKCCDlg::UnicodeToUTF8(const wchar_t *str)
 void CKCCDlg::OnBnClickedButtonDownloadResultFile()
 {
 	AfxBeginThread(DownloadResultNewThread, AfxGetMainWnd()->m_hWnd);
+}
+
+
+void CKCCDlg::OnBnClickedButtonLoadanaly()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	KCCPlugins kccp;
+	kccp.DoModal();
 }

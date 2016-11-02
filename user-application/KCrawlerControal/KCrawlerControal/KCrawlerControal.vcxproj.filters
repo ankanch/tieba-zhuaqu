@@ -36,6 +36,9 @@
     <ClInclude Include="CreateJobDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="KCCPlugins.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="KCrawlerControal.cpp">
@@ -48,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CreateJobDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KCCPlugins.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

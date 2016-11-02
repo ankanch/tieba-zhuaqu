@@ -45,7 +45,7 @@ def Interactive(conn,ct,nct,crawlist):
             xc = 0
             BK = False
             for item in crawlist:  #ID,IP,PORT
-                #print("item[0]=",item[0],"nct=",nct)
+                print("item[0]=",item[0],"nct=",nct)
                 if int(item[0]) == int(nct):
                     del crawlist[xc]
                     BK = True
@@ -64,7 +64,7 @@ def Interactive(conn,ct,nct,crawlist):
     del t[nct]
     count[0]-=1
     if( IS_ADMIN == False):
-        showMsg("\tClient #"+ str(ct+1) +": connection closed,resource cleaned")
+        showMsg("*********************\r\n***\t***Client #"+ str(ct+1) +": connection closed,resource cleaned***\r\n*********************")
 
 
 os.system('clear')

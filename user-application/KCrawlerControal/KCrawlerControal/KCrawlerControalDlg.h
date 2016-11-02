@@ -75,4 +75,5 @@ private:
 	
 public:
 	afx_msg void OnBnClickedButtonDownloadResultFile();
+	afx_msg void OnBnClickedButtonLoadanaly();
 };
