@@ -5,6 +5,7 @@
 #include "KCrawlerControal.h"
 #include "KCCPlugins.h"
 #include "afxdialogex.h"
+#include <locale.h>
 
 
 // KCCPlugins 对话框
@@ -31,6 +32,8 @@ void KCCPlugins::DoDataExchange(CDataExchange* pDX)
 void KCCPlugins::loadPlugins()
 {
 	CStdioFile cfg;
+	char* old_locale = _strdup(setlocale(LC_CTYPE, NULL));
+	setlocale(LC_CTYPE, "chs");//设定<ctpye.h>中字符处理方式
 	cfg.Open(PATH_PLUGINS_INDEX_FILE, CFile::modeRead);
 	CString line = _T("");
 	int pluginscount = 0;
@@ -80,11 +83,20 @@ void KCCPlugins::loadPlugins()
 		}
 		line = _T("");
 	}
+	setlocale(LC_CTYPE, old_locale);
+	free(old_locale);//还原区域设定
 	cfg.Close();
 }
 
+void KCCPlugins::setupBasicInfo()
+{
+
+}
+
+
 
 BEGIN_MESSAGE_MAP(KCCPlugins, CDialogEx)
+	ON_BN_CLICKED(IDC_ON_EXCUTE_PLUGINGS, &KCCPlugins::OnBnClickedOnExcutePlugings)
 END_MESSAGE_MAP()
 
 
@@ -96,8 +108,29 @@ BOOL KCCPlugins::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
+	setupBasicInfo();
 	loadPlugins();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE
+}
+
+
+void KCCPlugins::OnBnClickedOnExcutePlugings()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	//判断选择项
+	int selected = m_pluginslist.GetCurSel();
+	if (selected < 0)
+	{
+		MessageBox(_T("未选中任何可用插件！"), _T("错误"), MB_ICONERROR | MB_OK);
+		return;
+	}
+	CString exefilename = pluginlist[selected].exefilename;
+	TCHAR currentDir[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH,currentDir);
+	CString dir = currentDir;
+	exefilename = _T("/C python " + dir + "\\plugins\\") + exefilename;
+	//调用python脚本
+	ShellExecute(NULL, _T("open"),_T("cmd.exe"), exefilename, NULL, SW_SHOW);
 }

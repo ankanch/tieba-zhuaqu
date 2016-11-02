@@ -33,7 +33,9 @@ public:
 	CString PATH_PLUGINS_INDEX_FILE = _T("plugins.list");
 	Plugin *pluginlist;
 	void loadPlugins();   //加载插件（包括创建按钮与关联按钮事件）
+	void setupBasicInfo();  //设置任务的基本信息
 						  // 显示插件信息的列表框控件
 	CComboBox m_pluginslist;
 	virtual BOOL OnInitDialog();
+	afx_msg void OnBnClickedOnExcutePlugings();
 };
