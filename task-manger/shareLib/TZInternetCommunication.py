@@ -41,7 +41,11 @@ class SIC:
 def clientInterreactiveRecv(conn,size=1024):
     data = conn.recv(size)  
     #data = data.decode("utf-8",'ignore')
-    data = data.decode("utf-8",'ignore')
+    try:
+        data = data.decode("utf-8")
+    except Exception as e:
+        print("DECODE ERROR at clientInterreactiveRecv")
+        return ""
     return data
 
 def clientInterreactiveSend(conn,data):

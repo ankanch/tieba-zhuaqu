@@ -14,7 +14,7 @@ def showMsg(msg):
 
 #对于每一个新连接进来的客户端，都调用这个进行交互
 def Interactive(conn,ct,nct,crawlist):
-    TZIC.clientInterreactiveSend(conn,"TiebaZhuaqu TaskManager ver1.0 by Kanch\nkanchisme@gmail.com\nhttp://lucky1965.xyz\n")
+    TZIC.clientInterreactiveSend(conn,"TiebaZhuaqu TaskManager ver1.0 by Kanch\nkanchisme@gmail.com\nhttp://akakanch.com\n")
     TZIF.setDate(TZDS.DATA_CRAWLER_STATUS,0.0,int(nct))
     FIRSTRUN = True
     ADMINCONVERSITION = False
@@ -28,9 +28,12 @@ def Interactive(conn,ct,nct,crawlist):
             else:
                 print("conversiton interrupted!")
                 break
-        cmd = TZDF.findMatchCommand(data)
-        relcmd = TZDF.resolveCommand(data)
-        IS_ADMIN = TZIF.CheckAdmin(int(relcmd[0]))
+        try:
+            cmd = TZDF.findMatchCommand(data)
+            relcmd = TZDF.resolveCommand(data)
+            IS_ADMIN = TZIF.CheckAdmin(int(relcmd[0]))
+        except Exception as e:
+            pass
         if FIRSTRUN == True:
             if TZIF.CheckAdmin(int(relcmd[0])) == True:
                 ADMINCONVERSITION = True
@@ -45,7 +48,9 @@ def Interactive(conn,ct,nct,crawlist):
             xc = 0
             BK = False
             for item in crawlist:  #ID,IP,PORT
+                #print("item=",str(item),"\tnct=",nct)
                 if int(item[0]) == int(nct):
+                    #print("found delete!")
                     del crawlist[xc]
                     BK = True
                     break
@@ -57,7 +62,10 @@ def Interactive(conn,ct,nct,crawlist):
         elif(int(relcmd[0]) == TZDS.ADMIN_SHUTDOWN):
             SERVER_SHUTDOWN[0] = True
             break
-        cmd = TZIF.autoInteract(relcmd,conn,nct,crawlist)
+        cmd,CRLCHANGE,CRLCHANGE_LIST = TZIF.autoInteract(relcmd,conn,nct,crawlist)
+        if CRLCHANGE == True:
+            crawlist = CRLCHANGE_LIST
+            CRAWLER_LIST = CRLCHANGE_LIST
         TZIC.clientInterreactiveSend(conn,str(cmd))
     TZIC.closeConnection(conn)
     del t[nct]

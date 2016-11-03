@@ -13,6 +13,8 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
     cmd = 123
     cmd_head = int(relcmd[0])
     print("cmd_head=",cmd_head)
+    CRLCHANGE = False
+    CRLCHANGE_LIST = []
     if cmd_head == TZDS.FINISH:    #完成交互，暂时断线
         cmd = TZDF.makeUpCommand(TZDS.OKCLOSE,["crawler has been temparily disconnect to the server"])
     elif cmd_head == TZDS.REGISTE:  #将爬虫注册至服务器
@@ -60,7 +62,7 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
                 #先假设所有爬虫都是在线的
                 onlinecount = len(crawlerlist)
                  #一次爬虫在线验证
-                clist = getData(TZDS.DATA_CRAWLER_LIST)
+                clist = crawlerlist
                 onlineclist = []
                 i = 0
                 sum = len(clist)
@@ -75,12 +77,14 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
                     except Exception as e:
                         print("\tFAILED")
                         onlinecount-=1
-                #
+                        CRLCHANGE = True
+                #开始正式分配任务
                 setDate(TZDS.DATA_CRAWLER_LIST,onlineclist)
+                CRLCHANGE_LIST = onlineclist
                 print("\t\t\tJob Confirmed by Admin.")
                 avergepage = int(Pages / onlinecount)
                 print("\t\tallocate job...")
-                allocateJobs(TiebaName,avergepage,onlinecount)
+                allocateJobs(TiebaName,avergepage,onlinecount,onlineclist)
                 print("\t\t\tjob allocate done!")
             else:
                 cmd = TZDF.makeUpCommand(TZDS.OKCLOSE,["Job allocate interrupt by admin"])
@@ -88,8 +92,6 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
             cmd = TZDF.makeUpCommand(TZDS.ERROR,["ADMIN IDENTIFY FAILED!"])
     elif cmd_head == TZDS.ADMIN_JOBTRANSFER:    #传送所有抓取结果至admin端
         gatherSubjobs()
-        #cmd = TZDF.makeUpCommand(TZDS.OK,["start transfer..."])
-        #TZIC.clientInterreactiveSend(conn,cmd)
         sendFile(conn,"/../tieba-zhuaqu/reciveCache/tresult.txt")
         cmd = TZDF.makeUpCommand(TZDS.START_TRANSFER,["transfer done"])
     elif cmd_head == TZDS.ADMIN_SHUTDOWN:   #关闭任务管理服务器
@@ -102,7 +104,7 @@ def autoInteract(relcmd,conn,crawlerid,crawlerlist):
             cmd = TZDF.makeUpCommand(TZDS.JOB_CONFIRM,["成都信息工程大学","0","8"])
             print("--TEST MODE---")
     #print("\t\t\tautoInteract() return with cmd:",cmd)
-    return cmd
+    return cmd,CRLCHANGE,CRLCHANGE_LIST
 
 
 #对应状态下响应下的函数定义
@@ -217,9 +219,9 @@ def Updata():
 
 
 #向每个爬虫分配任务
-def allocateJobs(tiebaname,avpages,onlinecount):
+def allocateJobs(tiebaname,avpages,onlinecount,clist):
     sum = int(avpages*onlinecount)
-    clist = getData(TZDS.DATA_CRAWLER_LIST)
+    clist# = getData(TZDS.DATA_CRAWLER_LIST)
     aledpages = 0
     i=0
     sum = len(clist)
@@ -245,6 +247,7 @@ def gatherSubjobs():
         #print(data)
         tgfile.write(data)
         fa.close()
+        #os.system('sudo rm -rf ' + "/../tieba-zhuaqu/reciveCache/"+f)
     tgfile.close()
 
 
