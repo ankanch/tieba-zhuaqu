@@ -5,7 +5,7 @@ import shareLib.TZautoInteractFunc as TZIF
 import shareLib.TZDatagramFunc as TZDF
 import shareLib.TZInternetCommunication as TZIC
 
-HOST='216.45.55.153'
+HOST='ec2-54-238-242-34.ap-northeast-1.compute.amazonaws.com'
 PORT=50005
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 CS = True

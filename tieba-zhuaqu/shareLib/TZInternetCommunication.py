@@ -41,7 +41,7 @@ class SIC:
 def clientInterreactiveRecv(conn,size=1024):
     data = conn.recv(size)  
     #data = data.decode("utf-8",'ignore')
-    data = data.decode("utf-8")
+    data = data.decode("utf-8",'ignore')
     return data
 
 def clientInterreactiveSend(conn,data):

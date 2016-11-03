@@ -45,14 +45,13 @@ def Interactive(conn,ct,nct,crawlist):
             xc = 0
             BK = False
             for item in crawlist:  #ID,IP,PORT
-                print("item[0]=",item[0],"nct=",nct)
                 if int(item[0]) == int(nct):
                     del crawlist[xc]
                     BK = True
                     break
                 xc += 1
             TZIF.delData(TZDS.DATA_CRAWLER_STATUS,int(nct))
-            TZIF.setDate(TZDS.CRAWLER_LIST,crawlist)
+            TZIF.setDate(TZDS.DATA_CRAWLER_LIST,crawlist)
             if BK == True:
                 break
         elif(int(relcmd[0]) == TZDS.ADMIN_SHUTDOWN):

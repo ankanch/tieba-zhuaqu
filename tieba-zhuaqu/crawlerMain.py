@@ -136,11 +136,12 @@ TZIF.sendFile(s,"C:\\ktieba\\result.txt",CID)
 print(">>>>>任务进度文件上传完毕！")
 print(">>>>>程序结束！")
 #====发送完成消息====
-FILESENDCMD = str(TZDS.FINISH)+",Ready to send"
-s.sendall(FILESENDCMD.encode("utf-8"))  
-data=s.recv(1024)  
-data = data.decode("utf-8")
-print("任务完成！爬虫初始状态，准备下次任务。")
-s.sendall("102,crawler offline:job_finished".encode("utf-8"))  
+#FILESENDCMD = str(TZDS.FINISH)+",Ready to send"
+#s.sendall(FILESENDCMD.encode("utf-8"))  
+#data=s.recv(1024)  
+#data = data.decode("utf-8")
+#print("任务完成！爬虫初始状态，准备下次任务。")
+CRAWLER_OFFLINE_LINE = "102"
+s.sendall(CRAWLER_OFFLINE_LINE.encode("utf-8"))
 s.close()
 os.system('python crawlerMain.py')
