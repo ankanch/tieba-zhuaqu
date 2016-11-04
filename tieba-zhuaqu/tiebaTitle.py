@@ -36,8 +36,7 @@ def getHtml(url):
         html = page.read()
         return html
     except Exception as e:
-        print("->读取出错")
-        return ""
+        return bytes("NULL",encoding='utf-8')
 
 def getTitle(html):
     #    <a href="/p/4745088342" title="DDD" target="_blank" class="j_th_tit ">DDDD</a>
@@ -60,15 +59,100 @@ def getTitle(html):
         #匹配帖子地址,用来获得作者和发帖时间
         postUrl = re.sub("<a href=\"","",dta)
         postUrl = re.sub("\" title=.*?class=\"j_th_tit \">.*?</a>","",postUrl)
-        author , date , replydata = getTieziInfo(postUrl)
+        #author , date , replydata = getTieziInfo(postUrl)
+        author , date , replydata = getFirstPage(postUrl)
         dstr = dstr + '\r\n\t\t' + k + "@#@" + author + "@#@" + date + "@#@" + replydata
         t+=1
     print("\n")
     GV_FINISHED_COUNT[0] += 1
     return t,dstr
 
-#得到帖子的具体信息，包括发贴日期和发帖用户以及第一页里面的回帖,该函数最好单独调用，否则会卡死程序
-def getTieziInfo(suburl):
+#得到帖子的第一页所有回帖，作者以及回帖时间
+def getFirstPage(suburl):
+    html = getHtml('http://tieba.baidu.com' + suburl)
+    html = html.decode('utf-8','ignore')
+    #寻找用户名
+    head = "PageData.thread = {author:\""
+    tail = "\",thread_id :"
+    start = html.find(head)
+    end = html.find(tail,start)
+    postAuthor = html[start+len(head):end]
+    #寻找回帖
+    start = html.find(head)
+    end = html.find(tail,start)
+    reply = html[start+len(head):end]
+    html = html[end+len(tail):]
+    reply = onlyCHS(reply)
+    #寻找时间
+    head = "&quot;date&quot;:&quot;"
+    tail = "&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
+    start = html.find(head)
+    end = html.find(tail,start)
+    postDate = html[start+len(head):end]
+    html = html[end+len(tail):]
+
+    replydata = ""
+    #print("NOT IN WHILE:postAuthor=",postAuthor,"\tpostDate=",postDate,"\treply=",reply)
+    replydata = replydata + reply + "*#*" + postAuthor + "*#*" + postDate +"$#$"
+    #上面的代码完成了1楼信息的抓取
+    #接下来寻找第一页的回帖内容================================
+    #这个循环用来从当前HTML中匹配出所有用户块
+    BLOCK_START_END = "<a style=\"\" target=\"_blank\" class=\"p_author_face \" href=\""
+    poblock = []
+    while True:
+        ibsea = html.find(BLOCK_START_END)
+        ibseb = html.find(BLOCK_START_END,ibsea+len(BLOCK_START_END))
+        if ibsea < 0 or ibseb < 0:
+            break
+        userblock = html[ibsea+len(BLOCK_START_END):ibseb]
+        poblock.append(userblock)
+        html = html[ibseb+len(BLOCK_START_END):]
+    print(len(poblock),end="")
+    #os.system("pause")
+    #下面这个循环用来从所有用户块中匹配出发帖时间，帖子内容，作者信息
+    #寻找该页的所有回帖内容
+    head = " j_d_post_content  clearfix\">            "
+    tail = "</div><br></cc><br><div class=\"user-hide-post-down\" style=\"display: none;\"></div>"
+    #寻找发帖用户
+    username_head="<img username=\""
+    username_tail="\" class=\"\" src=\""
+    #寻找发帖时间
+    postdate_head="&quot;date&quot;:&quot;"
+    postdate_tail="&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
+    for html in poblock:
+        #寻找作者
+        start = html.find(username_head)
+        end = html.find(username_tail)
+        if end < 0 or start < 0 :
+            break
+        author = html[start+len(username_head):end]
+        html = html[end+len(username_tail):]
+        #寻找回帖内容
+        start = html.find(head)
+        end = html.find(tail,start+len(head))
+        if end < 0 or start < 0 :
+            break
+        reply = html[start+len(head):end]
+        html = html[end+len(tail):]
+        reply = onlyCHS(reply)
+        #找到了一个回复，接下来寻找作者和发帖时间
+        #寻找发帖时间
+        start = html.find(postdate_head)
+        end = html.find(postdate_tail)
+        if end < 0 or start < 0 :
+            break
+        date = html[start+len(postdate_head):end]
+        html = html[end+len(postdate_tail):]
+        #os.system("pause")
+        replydata = replydata + reply + "*#*" + author + "*#*" + date +"$#$"       
+    #返回结果
+    return postAuthor , postDate , replydata
+
+##
+#得到帖子的具体信息，包括发贴日期和发帖用户以及第一页里面的回帖,
+"""该函数存在问题，故注释掉，在以后的更新中，该函数可能会消失，该函数目前已用getFirstPage代替
+def getTieziInfo(suburl):"""
+
     html = getHtml('http://tieba.baidu.com' + suburl)
     html = html.decode('utf-8','ignore')
     #寻找用户名
@@ -106,18 +190,23 @@ def getTieziInfo(suburl):
     postdate_head="&quot;date&quot;:&quot;"
     postdate_tail="&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
     while True:
-        if html.find(tail) < 0:
+        if html.find(username_tail) < 0:
             break
         #寻找作者
         start = html.find(username_head)
         end = html.find(username_tail)
+        if end < 0 or start < 0 :
+            break
         author = html[start+len(username_head):end]
         html = html[end+len(username_tail):]
         #print("author=",author,"\tstart=",start,"\tend=",end)
         #寻找回帖内容
         start = html.find(head)
         end = html.find(tail,start)
+        if end < 0 or start < 0 :
+            break
         reply = html[start+len(head):end]
+        print("reply DATA:\t","\tstart=",start,"\tend=",end,"\tminus=",end-start)
         html = html[end+len(tail):]
         reply = onlyCHS(reply)
         #print("reply=",reply)
@@ -125,6 +214,8 @@ def getTieziInfo(suburl):
         #寻找发帖时间
         start = html.find(postdate_head)
         end = html.find(postdate_tail)
+        if end < 0 or start < 0 :
+            break
         date = html[start+len(postdate_head):end]
         html = html[end+len(postdate_tail):]
         #print("post date=",date,"\tstart=",start,"\tend=",end)
@@ -143,6 +234,10 @@ def onlyCHS(reply):
     ex_div_tail = ">"
     ex_a_head = "<a href="
     ex_a_tail = "</a>"
+    ex_span_head = "<span"
+    ex_span_tail = "</span>"
+    ex_embed_head = "<embed"
+    ex_embed_tail = ">"
     #去掉贴吧表情之类的内嵌HTML标签
     imgstart = reply.find(ex_img_head)
     reply = reply.replace("<br>","")
@@ -169,12 +264,29 @@ def onlyCHS(reply):
      #清除a
     astart = reply.find(ex_a_head)
     while True:
-        #print("astart=",imgstart,"reply=",reply)
-        #os.system("pause")
         if astart < 0 or reply.find(ex_a_tail) < 0:
             break
         reply = reply[:astart] + reply[reply.find(ex_a_tail,astart)+len(ex_a_tail):]
         astart = reply.find(ex_a_head)
+    #清除span
+    spanstart = reply.find(ex_span_head)
+    while True:
+        #print("spanstart=",imgstart,"reply=",reply)
+        #os.system("pause")
+        if spanstart < 0 or reply.find(ex_span_tail) < 0:
+            break
+        reply = reply[:spanstart] + reply[reply.find(ex_span_tail,spanstart)+len(ex_span_tail):]
+        spanstart = reply.find(ex_span_head)
+        #print("\tdiv-clear-while:\treply=",reply)
+    #清除<embed
+    embedstart = reply.find(ex_embed_head)
+    while True:
+        #print("embedstart=",imgstart,"reply=",reply)
+        #os.system("pause")
+        if embedstart < 0 or reply.find(ex_embed_tail) < 0:
+            break
+        reply = reply[:embedstart] + reply[reply.find(ex_embed_tail,embedstart)+len(ex_embed_tail):]
+        embedstart = reply.find(ex_embed_head)
         #print("\tdiv-clear-while:\treply=",reply)
     return reply    
 
