@@ -20,8 +20,19 @@ def barGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例',xWidth
 	
 #折线图:蓝色粗线
 def linePlotGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例'):
+    lbwidth = []
+    x = 1
+    for item in xValueList:
+        lbwidth.append(x)
+        x += 1 #定义表格宽度
     with plt.style.context('fivethirtyeight'):
-        plt.plot(xValueList, yValueList,'g')
+        plt.title(graphicTitle,fontproperties=font_set)
+        plt.xlabel(xLabel,fontproperties=font_set)
+        plt.ylabel(yLabel,fontproperties=font_set)
+        plt.xticks(lbwidth,xValueList,fontproperties=font_set)    
+        #plt.plot(xValueList,yValueList)
+        plt.plot(yValueList)
+        yValueList.sort()
     plt.show()
 #散点图:蓝色点
 def scatterPlotsGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例'):

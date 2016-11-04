@@ -61,7 +61,7 @@ def getTitle(html):
         postUrl = re.sub("\" title=.*?class=\"j_th_tit \">.*?</a>","",postUrl)
         #author , date , replydata = getTieziInfo(postUrl)
         author , date , replydata = getFirstPage(postUrl)
-        dstr = dstr + '\r\n\t\t' + k + "@#@" + author + "@#@" + date + "@#@" + replydata
+        dstr = dstr + '\r\n\t\t' + k + "*#*" + author + "*#*" + date + "@#@" + replydata
         t+=1
     print("\n")
     GV_FINISHED_COUNT[0] += 1
@@ -93,7 +93,7 @@ def getFirstPage(suburl):
 
     replydata = ""
     #print("NOT IN WHILE:postAuthor=",postAuthor,"\tpostDate=",postDate,"\treply=",reply)
-    replydata = replydata + reply + "*#*" + postAuthor + "*#*" + postDate +"$#$"
+    #replydata = replydata + reply + "*#*" + postAuthor + "*#*" + postDate +"$#$"
     #上面的代码完成了1楼信息的抓取
     #接下来寻找第一页的回帖内容================================
     #这个循环用来从当前HTML中匹配出所有用户块
@@ -151,8 +151,8 @@ def getFirstPage(suburl):
 ##
 #得到帖子的具体信息，包括发贴日期和发帖用户以及第一页里面的回帖,
 """该函数存在问题，故注释掉，在以后的更新中，该函数可能会消失，该函数目前已用getFirstPage代替
-def getTieziInfo(suburl):"""
-
+"""
+def getTieziInfo(suburl):
     html = getHtml('http://tieba.baidu.com' + suburl)
     html = html.decode('utf-8','ignore')
     #寻找用户名
