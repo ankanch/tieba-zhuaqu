@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties  
+import numpy
 font_set = FontProperties(fname=r"c:\\windows\\fonts\\simsun.ttc", size=15)  
 
 #基本柱形统计图
@@ -20,19 +21,15 @@ def barGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例',xWidth
 	
 #折线图:蓝色粗线
 def linePlotGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例'):
-    lbwidth = []
-    x = 1
-    for item in xValueList:
-        lbwidth.append(x)
-        x += 1 #定义表格宽度
     with plt.style.context('fivethirtyeight'):
         plt.title(graphicTitle,fontproperties=font_set)
         plt.xlabel(xLabel,fontproperties=font_set)
         plt.ylabel(yLabel,fontproperties=font_set)
-        plt.xticks(lbwidth,xValueList,fontproperties=font_set)    
+        plt.xticks(numpy.arange(len(xValueList)),xValueList,rotation=45,fontproperties=font_set)    
         #plt.plot(xValueList,yValueList)
         plt.plot(yValueList)
         yValueList.sort()
+    plt.subplots_adjust(bottom=0.15)
     plt.show()
 #散点图:蓝色点
 def scatterPlotsGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例'):

@@ -21,7 +21,8 @@ def singleWordTF(word,datalist,scale=30):
     xdate = begtime
     while x<=blocks:
         feqlist.append(0)
-        timeline.append(str(xdate.date().month)+"."+str(xdate.date().day))
+        #timeline.append(str(xdate.date().month)+"."+str(xdate.date().day))
+        timeline.append(str(xdate.date()))
         xdate += datetime.timedelta(days=scale)
         x+=1
     # [ [[帖子标题,作者,发帖时间] , [回帖列表：[回帖内容,作者,回帖时间],[回帖内容,作者,回帖时间],[[......]],.....]] ]

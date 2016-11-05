@@ -10,7 +10,7 @@ socket.setdefaulttimeout(60)
 GV_DOWNLOAD_ALL = []
 GV_THEAD_COUNT = 4   #并发下载线程数
 GV_FINISHED_COUNT = []
-GV_MODE = 1
+GV_POCESSSUM = []
 page = 0
 x=0
 max_page = 0
@@ -31,12 +31,14 @@ def setupfiles():
 
 
 def getHtml(url):
-    try:
-        page = urllib.request.urlopen(url,timeout=5)
-        html = page.read()
-        return html
-    except Exception as e:
-        return bytes("NULL",encoding='utf-8')
+    while True:
+        try:
+            page = urllib.request.urlopen(url,timeout=5)
+            html = page.read()
+            return html
+        except Exception as e:
+            print("下载出错！重试中...")
+            pass
 
 def getTitle(html):
     #    <a href="/p/4745088342" title="DDD" target="_blank" class="j_th_tit ">DDDD</a>
@@ -164,9 +166,9 @@ def getTieziInfo(suburl):
     #寻找回帖
     start = html.find(head)
     end = html.find(tail,start)
-    reply = html[start+len(head):end]
+    rawreply = html[start+len(head):end]
     html = html[end+len(tail):]
-    reply = onlyCHS(reply)
+    rawreply = onlyCHS(rawreply)
     #寻找时间
     head = "&quot;date&quot;:&quot;"
     tail = "&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
@@ -177,7 +179,7 @@ def getTieziInfo(suburl):
 
     replydata = ""
     #print("NOT IN WHILE:postAuthor=",postAuthor,"\tpostDate=",postDate,"\treply=",reply)
-    replydata = replydata + reply + "*#*" + postAuthor + "*#*" + postDate +"$#$"
+    replydata = replydata + rawreply + "*#*" + postAuthor + "*#*" + postDate +"$#$"
     #上面的代码完成了1楼信息的抓取
     #接下来寻找第一页的回帖内容================================
     #寻找该页的所有回帖内容
@@ -205,10 +207,10 @@ def getTieziInfo(suburl):
         end = html.find(tail,start)
         if end < 0 or start < 0 :
             break
-        reply = html[start+len(head):end]
-        print("reply DATA:\t","\tstart=",start,"\tend=",end,"\tminus=",end-start)
+        rawreply = html[start+len(head):end]
+        print("rawreply DATA:\t","\tstart=",start,"\tend=",end,"\tminus=",end-start)
         html = html[end+len(tail):]
-        reply = onlyCHS(reply)
+        rawreply = onlyCHS(rawreply)
         #print("reply=",reply)
         #找到了一个回复，接下来寻找作者和发帖时间
         #寻找发帖时间
@@ -243,51 +245,72 @@ def onlyCHS(reply):
     reply = reply.replace("<br>","")
     #清除img
     while True:
-        #print("imgstart=",imgstart,"reply=",reply)
+        rplen = len(reply)
+        #print("imgstart=",imgstart,"\tlen(reply)=",len(reply))
         #os.system("pause")
         if imgstart < 0 or reply.find(ex_img_tail) < 0:
             break
+        lastreply = reply
         reply = reply[:imgstart] + reply[reply.find(ex_img_tail,imgstart)+len(ex_img_tail):]
+        if len(reply) > rplen:
+            reply = lastreply
+            break
         imgstart = reply.find(ex_img_head)
-        #print("\timg-clear-while:\treply=",reply)
     #清除div
     divstart = reply.find(ex_div_head)
     reply = reply.replace("</div>","")
     while True:
         #print("divstart=",imgstart,"reply=",reply)
         #os.system("pause")
+        rplen = len(reply)
         if divstart < 0 or reply.find(ex_div_tail) < 0:
             break
+        lastreply = reply
         reply = reply[:divstart] + reply[reply.find(ex_div_tail,divstart)+len(ex_div_tail):]
-        divstart = reply.find(ex_div_head)
-        #print("\tdiv-clear-while:\treply=",reply)    
+        if len(reply) > rplen:
+            reply = lastreply
+            break
+        divstart = reply.find(ex_div_head)  
      #清除a
     astart = reply.find(ex_a_head)
     while True:
+        rplen = len(reply)
         if astart < 0 or reply.find(ex_a_tail) < 0:
             break
+        lastreply = reply
         reply = reply[:astart] + reply[reply.find(ex_a_tail,astart)+len(ex_a_tail):]
+        if len(reply) > rplen:
+            reply = lastreply
+            break
         astart = reply.find(ex_a_head)
     #清除span
     spanstart = reply.find(ex_span_head)
     while True:
         #print("spanstart=",imgstart,"reply=",reply)
         #os.system("pause")
+        rplen = len(reply)
         if spanstart < 0 or reply.find(ex_span_tail) < 0:
             break
+        lastreply = reply
         reply = reply[:spanstart] + reply[reply.find(ex_span_tail,spanstart)+len(ex_span_tail):]
+        if len(reply) > rplen:
+            reply = lastreply
+            break
         spanstart = reply.find(ex_span_head)
-        #print("\tdiv-clear-while:\treply=",reply)
     #清除<embed
     embedstart = reply.find(ex_embed_head)
     while True:
         #print("embedstart=",imgstart,"reply=",reply)
         #os.system("pause")
+        rplen = len(reply)
         if embedstart < 0 or reply.find(ex_embed_tail) < 0:
             break
+        lastreply = reply
         reply = reply[:embedstart] + reply[reply.find(ex_embed_tail,embedstart)+len(ex_embed_tail):]
+        if len(reply) > rplen:
+            reply = lastreply
+            break
         embedstart = reply.find(ex_embed_head)
-        #print("\tdiv-clear-while:\treply=",reply)
     return reply    
 
 
@@ -297,6 +320,7 @@ def savetofile(data,path):
     f.close()
 
 def downloadPage(psum,count,begURL,beg=0):
+    GV_POCESSSUM.append((psum-beg)*GV_THEAD_COUNT)
     x=beg
     page = x*50
     GV_DOWNLOAD_ALL.append(False)
@@ -342,7 +366,8 @@ def pocessDataList(GV_COUNT,begURL):
                 if item == True:
                     x += 1
             print('子线程处理完毕！','调试：x=',x,'GV_COUNT=',GV_COUNT)
-        if GV_FINISHED_COUNT[0] == GV_COUNT:
+        #if GV_FINISHED_COUNT[0] == GV_COUNT:
+        if GV_FINISHED_COUNT[0] == GV_POCESSSUM[0]:
             NO_OUT = False
             break
         #检测是否有线程异常，如果异常，则重新启动

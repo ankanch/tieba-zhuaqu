@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import threading
-import dataminer
+#import dataminer
 import pickle
 import datetime
 
@@ -23,7 +23,7 @@ if isize > 10:
     print('\n\n\n>>>>>检测到数据集，是否使用现有数据集？')
     opt = input('\t>>>数据集大小：'+str(isize)+' bytes,共'+str(xs['sum'])+'条数据,创建日期：'+str(xs['time']) +'\n>>>>>是否使用？(Y/N)_____\b\b\b')
     if opt == 'Y':
-        dataminer.startPocessMoudle('C:\\ktieba\\result.txt')
+        #dataminer.startPocessMoudle('C:\\ktieba\\result.txt')
         sys.exit(0)
 opt = input('\r\n>>>>>是否要指定抓取的贴吧？如果不指定，将会默认抓取【成都信息工程大学】吧。（Y/N）:____\b\b')
 if opt == 'Y':
