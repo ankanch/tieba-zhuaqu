@@ -21,7 +21,6 @@ def singleWordTF(word,datalist,scale=30):
     xdate = begtime
     while x<=blocks:
         feqlist.append(0)
-        #timeline.append(str(xdate.date().month)+"."+str(xdate.date().day))
         timeline.append(str(xdate.date()))
         xdate += datetime.timedelta(days=scale)
         x+=1
@@ -52,7 +51,8 @@ def singleWordTF(word,datalist,scale=30):
 #该函数用于从外部执行
 def extrenSingleWordTF():
     word = input("请输入要统计的词语：")
-    singleWordTF(word,RFF.getPostDataList(),scale=30)
+    scale = int(input("输入缩放方式："))
+    singleWordTF(word,RFF.getPostDataList(),scale)
 
 #该函数为辅助函数，用于找出时间区间
 #返回值：最早时间，最近时间

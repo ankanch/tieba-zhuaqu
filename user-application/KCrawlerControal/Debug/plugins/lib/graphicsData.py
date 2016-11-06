@@ -29,7 +29,18 @@ def linePlotGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例'):
         #plt.plot(xValueList,yValueList)
         plt.plot(yValueList)
         yValueList.sort()
+    #设置y轴区间以及图像最低端距x轴距离
+    plt.ylim(-1.0, yValueList[len(yValueList)-1])
     plt.subplots_adjust(bottom=0.15)
+    #下面的代码用来设置网格线
+    ax = plt.gca()
+    ax.grid(b=False,axis='x')
+    axis = ax.xaxis
+    for line in axis.get_ticklines():
+        line.set_color("black")
+        line.set_markersize(6)
+        line.set_markeredgewidth(1)
+    #显示折线图
     plt.show()
 #散点图:蓝色点
 def scatterPlotsGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例'):
@@ -47,3 +58,4 @@ def autolabel(rects):
 #barGraphics('等级','数量',['A','B','C','D','E','F'],[29,30,40,47,38,23],'测试图例')
 #linePlotGraphics("xLabel","yLabel",[1,2,3,4,5,6,7,8,9,10],[1.1,1.9,2.6,3.6,9.8,14,24,40,80,150],graphicTitle='图例')
 #scatterPlotsGraphics("xLabel","yLabel",[1,2,3,4,5,6,7,8,9,10],[1,11.9,2,6.3,6,9.8,14,4,8,5],graphicTitle='图例')
+

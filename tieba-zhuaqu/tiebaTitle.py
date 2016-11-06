@@ -18,6 +18,7 @@ pocessList=[]
 
 GV_ERROR_THREAD_DATA = []   #该变量用来储存出错线程数据，包括线程编号，当前线程下载位置，线程目标下载位置（里面储存的是list，按照该顺序排列）
 
+#该函数用来建立一些必要的缓存文件（仅适用于windows）
 def setupfiles():
     if os.path.exists('C:\\ktieba') == False:
         os.makedirs( "C:\\ktieba" )
@@ -29,7 +30,8 @@ def setupfiles():
         f = open('C:\\ktieba\\ignoreWords','w')
     GV_FINISHED_COUNT.append(0)
 
-
+#该函数用来下载网页，如果出错会一直循环下载
+#返回值：网页源代码
 def getHtml(url):
     while True:
         try:
@@ -37,9 +39,11 @@ def getHtml(url):
             html = page.read()
             return html
         except Exception as e:
-            print("下载出错！重试中...")
+            print("下载出错！重试中...",end="\t")
             pass
 
+#该函数用来匹配出网页中的所有帖子以及相应的帖子链接
+#返回值：匹配的帖子数量，帖子数据
 def getTitle(html):
     #    <a href="/p/4745088342" title="DDD" target="_blank" class="j_th_tit ">DDDD</a>
     reg = r"<a href=\"/p/.*?class=\"j_th_tit \">.*?</a>"
@@ -70,6 +74,7 @@ def getTitle(html):
     return t,dstr
 
 #得到帖子的第一页所有回帖，作者以及回帖时间
+#返回值：作者，发帖时间，回复数据
 def getFirstPage(suburl):
     html = getHtml('http://tieba.baidu.com' + suburl)
     html = html.decode('utf-8','ignore')
@@ -153,7 +158,6 @@ def getFirstPage(suburl):
 ##
 #得到帖子的具体信息，包括发贴日期和发帖用户以及第一页里面的回帖,
 """该函数存在问题，故注释掉，在以后的更新中，该函数可能会消失，该函数目前已用getFirstPage代替
-"""
 def getTieziInfo(suburl):
     html = getHtml('http://tieba.baidu.com' + suburl)
     html = html.decode('utf-8','ignore')
@@ -226,8 +230,10 @@ def getTieziInfo(suburl):
         replydata = replydata + reply + "*#*" + author + "*#*" + date +"$#$"
     #返回结果
     return postAuthor , postDate , replydata
+"""
 
 #该函数用来去掉回帖中无关HTML标签，只保留中文/英文
+#返回值：无HTML标签的回帖数据，如果出错，返回空字符串
 def onlyCHS(reply):
     #回复里面的多于图片标签
     ex_img_head = "<img"
@@ -311,14 +317,17 @@ def onlyCHS(reply):
             reply = lastreply
             break
         embedstart = reply.find(ex_embed_head)
+    if reply.find("</div>") > -1:
+        return ""
     return reply    
 
-
+#该函数用来将最终数据保存到文件里面
 def savetofile(data,path):
     f = open(path,'wb')
     f.write(data.encode('gb18030'))
     f.close()
 
+#该函数用来下载网页，为【入口函数】，以上所有函数均由该函数直接/间接调用
 def downloadPage(psum,count,begURL,beg=0):
     GV_POCESSSUM.append((psum-beg)*GV_THEAD_COUNT)
     x=beg
@@ -344,6 +353,7 @@ def downloadPage(psum,count,begURL,beg=0):
         axa = GV_ERROR_THREAD_DATA[ len( GV_ERROR_THREAD_DATA ) - 1 ]
 
 
+#该函数用来处理网页的HTML信息，为【第二入口】函数，控制线程的结束与终止
 def pocessDataList(GV_COUNT,begURL):
     titlesum = 0
     titlelist = ''
@@ -365,7 +375,7 @@ def pocessDataList(GV_COUNT,begURL):
             for item in GV_DOWNLOAD_ALL:
                 if item == True:
                     x += 1
-            print('子线程处理完毕！','调试：x=',x,'GV_COUNT=',GV_COUNT)
+            print('下载完毕！','调试：x=',x,'GV_COUNT=',GV_COUNT)
         #if GV_FINISHED_COUNT[0] == GV_COUNT:
         if GV_FINISHED_COUNT[0] == GV_POCESSSUM[0]:
             NO_OUT = False
@@ -380,4 +390,9 @@ def pocessDataList(GV_COUNT,begURL):
                 tn.start()
                 del GV_ERROR_THREAD_DATA[0]
     return titlesum,titlelist
+
+
+#该函数用来处理每一条帖子的第一页信息
+def dispatchPocessSuburl():
+    pass
 
