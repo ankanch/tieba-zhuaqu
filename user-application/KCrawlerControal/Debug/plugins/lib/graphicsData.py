@@ -22,26 +22,28 @@ def barGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例',xWidth
 #折线图:蓝色粗线
 def linePlotGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例'):
     with plt.style.context('fivethirtyeight'):
-        plt.title(graphicTitle,fontproperties=font_set)
+        plt.title(graphicTitle,fontproperties=font_set,fontsize=20)
         plt.xlabel(xLabel,fontproperties=font_set)
         plt.ylabel(yLabel,fontproperties=font_set)
         plt.xticks(numpy.arange(len(xValueList)),xValueList,rotation=45,fontproperties=font_set)    
-        #plt.plot(xValueList,yValueList)
         plt.plot(yValueList)
         yValueList.sort()
     #设置y轴区间以及图像最低端距x轴距离
-    plt.ylim(-1.0, yValueList[len(yValueList)-1])
-    plt.subplots_adjust(bottom=0.15)
+    plt.ylim(-1.0, yValueList[len(yValueList)-1]+1)
+    plt.subplots_adjust(bottom=0.15,left=0.05,right=0.98,top=0.92)
     #下面的代码用来设置网格线
     ax = plt.gca()
+    ax.get_xaxis().tick_bottom() #仅显示下面的x轴的ticks
+    ax.get_yaxis().tick_left()
     ax.grid(b=False,axis='x')
     axis = ax.xaxis
     for line in axis.get_ticklines():
-        line.set_color("black")
+        line.set_color("gray")
         line.set_markersize(6)
         line.set_markeredgewidth(1)
     #显示折线图
     plt.show()
+    #plt.savefig('percent-bachelors-degrees-women-usa.png', bbox_inches='tight')
 #散点图:蓝色点
 def scatterPlotsGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例'):
     with plt.style.context('fivethirtyeight'):

@@ -131,7 +131,7 @@ def showLastYears(word,years):
     x = 0
     xdate = begdate
     print("begdate=",begdate,"enddate=",enddate)
-    while x < years: #初始化频率数组
+    while x <= years: #初始化频率数组
         feqlist.append(0)
         timeline.append(str(xdate.year)+"年")
         print(str(xdate.year))
@@ -140,8 +140,10 @@ def showLastYears(word,years):
     #sposdate：[ [内容,作者,时间],[......],...... ]
     for post in spostdate:
         if post[0].find(word) > -1:
-            satpos = int(((datetime.datetime.strptime(post[2], "%Y-%m-%d %H:%M") - begdate).days)/365)
-            feqlist[satpos-1]+=1
+            postdate = datetime.datetime.strptime(post[2], "%Y-%m-%d %H:%M")
+            satpos = postdate.year - begdate.year
+            print("satpos=",satpos,"\tpostdate=",postdate,"\tbegdate=",begdate,"\tyear1=",postdate.year,"\tyear2=",begdate.year)
+            feqlist[satpos]+=1
     #开始绘图
     drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,'时间频率图('+ str(begdate.year) + "->" + str(enddate.year) +")")
     print('>>>>>图像加载完毕')
@@ -150,9 +152,9 @@ def showLastYears(word,years):
 def extrenSingleWordTF():
     word = input("请输入要统计的词语：")
     scale = int(input("输入天/月/年："))
-    #showLastDays(word,scale)
+    showLastDays(word,scale)
     #showLastMonths(word,scale)
-    showLastYears(word,scale)
+    #showLastYears(word,scale)
     #singleWordTF(word,RFF.getPostDataList(),scale)
 
 #该函数为辅助函数，用于找出时间区间
