@@ -1,43 +1,35 @@
-﻿import tiebaTitle as TT
-import urllib
+import tiebaTitle as TT
+import urllib.request
 import os
 import sys
 import time
 import threading
+import MailService
 import pickle
 import datetime
-import MailService
+
 
 #该脚本用来抓取我们贴吧帖子的标题
 begURL = 'http://tieba.baidu.com/f?'
 #主程序逻辑
 TT.setupfiles()
 os.system('cls')
-print('>>>>>This script can be used to get data from Tieba\n>>>>>by Kanch kanchisme@gmail.com')
-isize = os.path.getsize('result.txt')
-if isize > 10:
-    f = open('result_add','rb')
-    xs = pickle.load(f)
-    f.close()
-    print('\t>>>Dataset size:'+str(isize)+' bytes,with'+str(xs['sum'])+'pieces of data,created on'+str(xs['time']))
-opt = input('\r\n>>>>>Enter the name of Tieba you\'d like to retrive?If NO,[LiYi] defaulty(Y/N):____\b\b')
+print('>>>>>该脚本用来抓取贴吧帖子的标题，可以用作舆情分析\n>>>>>by Kanch kanchisme@gmail.com')
+opt = input('\r\n>>>>>是否要指定抓取的贴吧？如果不指定，将会默认抓取【成都信息工程大学】吧。（Y/N）:____\b\b')
 if opt == 'Y':
-    tieba_name = input('>>>>>Input the name of Tieba where data to retrive:______________________\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
-    print('>>>>>Target Tieba [' + tieba_name + ']')
+    tieba_name = input('>>>>>请输入要抓取的贴吧：______________________\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b')
+    print('>>>>>程序将会抓取【' + tieba_name + '】吧！')
 else:
-    tieba_name = '李毅'
-    print('>>>>>no specific TIeba settled,retrive data from [LiYi] defaulty')
+    tieba_name = '成都信息工程大学'
+    print('>>>>>未指定贴吧，默认抓取【成都信息工程大学】吧！')
 KWD = urllib.parse.urlencode({'kw':tieba_name})
 begURL = begURL + KWD + '&ie=utf-8&pn='
-TT.max_page = input('>>>>>How many pages you\'d like to retrive:______\b\b\b\b\b')
+TT.max_page = input('>>>>>请输入需要抓取的页数：______\b\b\b\b\b')
 
-GTC = input('>>>>>how many threads fit you the best:_____\b\b\b')
+GTC = input('>>>>>请输入并发线程数量（程序将会使用多线程下载网页，过大易出问题，取决于您的CPU核心数量 2,4,.....）：_____\b\b\b')
 TT.GV_THEAD_COUNT = int(GTC)
 
-gmode = input('>>>>>Mode Selection:1.Default 2.Deep (in Deep mode,script will get author and post data besides post title)\nEnter mode::_______\b\b\b\b')
-TT.GV_MODE = int(gmode)
-
-mstr = "============================================================\r\nRESULT\r\n============================================================="
+mstr = "============================================================\r\n抓取结果\r\n============================================================="
 createdtime = datetime.datetime.now()
 createdtime.strftime('%Y-%m-%d %H:%M:%S')  
 #======================================================================================
@@ -72,19 +64,28 @@ now = datetime.datetime.now()
 now.strftime('%Y-%m-%d %H:%M:%S')  
 last_data_source = {'sum':sum,'time':now}
 
-TT.savetofile(mstr,'result.txt')
-f = open('result_add','wb')
+TT.savetofile(mstr,'C:\\ktieba\\result.txt')
+f = open('C:\\ktieba\\result_add','wb')
 pickle.dump(last_data_source, f,2)
 f.close()
 time2 = time.time()
 tc = time2 - time1
-print('>>>>>Script pocess finished!Total time cost:',str(tc),'seconds\n>>>>>with[',sum,']pieces of data in all\n>>>>>result have been save to','result.txt')
-
-
+print('>>>>>抓取完毕！耗时：',str(tc),'秒\n>>>>>共抓取【',sum,'】条数据\n>>>>>结果已经保存至','C:\\ktieba\\result.txt')
+#=============邮件提醒===================
+#计算耗时
+totalseconds = tc
+days = int(tc/86400)
+tc -= days*86400
+hours = int(tc/3600)
+tc -= hours*3600
+minutes = int(tc/60)
+tc -= minutes*60
+timscost = str(days) + " days," + str(hours) + " hours," + str(minutes) + " minutes," + str(tc) + " seconds. (total:" + str(totalseconds) + "seconds)"
+#邮件正文
 Title = "Download Success! Finised on " + str(now) + '.'
 line1 = "Tieba job created on " + str(createdtime) + " now has been finised!\r\n=========================\r\nSummary\r\n\r\n"
-line2 = "\r\nJob Created on: \t"+str(createdtime)+'\r\nJob finished on: \t'+str(now) +"\r\nPieces of data retrived:   " + str(sum) +"\r\nTotal time cost: \t" + str(tc) + " seconds"
-line3 = "\r\n\r\n\r\n This mail is send by Kanch's PythonBot @ 216.45.55.153\r\n=========================\r\n"
+line2 = "\r\nJob Created on: \t"+str(createdtime)+'\r\nJob finished on: \t'+str(now) +"\r\nPieces of data retrived:   " + str(sum) +"\r\nTime cost: \t" + timscost
+line3 = "\r\n\r\n\r\n This mail is send by Kanch's PythonBot @ AmazonECS\r\n=========================\r\n"
 Content = line1 + line2 + line3
 #print(Title,'\r\n',Content)
 MailService.SendMail('1075900121@qq.com',Title,Content)
