@@ -89,7 +89,8 @@ def getFirstPage(suburl):
     end = html.find(tail,start)
     reply = html[start+len(head):end]
     html = html[end+len(tail):]
-    reply = onlyCHS(reply)
+    #reply = onlyCHS(reply)
+    reply = cleanhtml(reply)
     #寻找时间
     head = "&quot;date&quot;:&quot;"
     tail = "&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
@@ -234,6 +235,7 @@ def getTieziInfo(suburl):
 
 #该函数用来去掉回帖中无关HTML标签，只保留中文/英文
 #返回值：无HTML标签的回帖数据，如果出错，返回空字符串
+""""该函数存在问题，故注释掉，在以后的更新中，该函数可能会消失，该函数目前已用cleanhtml代替
 def onlyCHS(reply):
     #回复里面的多于图片标签
     ex_img_head = "<img"
@@ -320,6 +322,14 @@ def onlyCHS(reply):
     if reply.find("</div>") > -1:
         return ""
     return reply    
+""""
+
+#该函数用来去掉回帖中无关HTML标签，只保留中文/英文
+#返回值：无HTML标签的回帖数据，如果出错，返回空字符串
+def cleanhtml(reply):
+  cleanr = re.compile('<.*?>')
+  onlytext = re.sub(cleanr, '', reply)
+  return onlytext
 
 #该函数用来将最终数据保存到文件里面
 def savetofile(data,path):

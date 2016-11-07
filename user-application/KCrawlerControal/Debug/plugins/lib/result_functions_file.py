@@ -22,13 +22,16 @@ def getPostDataList():
         if len(post) < 9:
             continue
         spd = post.split(SPILT_TITLE_PDATA) #spd[0]=标题数据 spd[1]=回帖数据
-        titledata = spd[0].split(SPILT_INNER_DATA)   
-        replylist = spd[1].split(SPILT_INNER_REPLY)
-        replydata = []
-        for reply in replylist:
-            rep = reply.split(SPILT_INNER_DATA)
-            replydata.append(rep)
-        postdata.append([titledata,replydata])
+        titledata = spd[0].split(SPILT_INNER_DATA)
+        try:
+            replylist = spd[1].split(SPILT_INNER_REPLY)
+            replydata = []
+            for reply in replylist:
+                rep = reply.split(SPILT_INNER_DATA)
+                replydata.append(rep)
+            postdata.append([titledata,replydata])
+        except:
+            print("replydata error,no index 2")
     return postdata
 
 #该函数的作用是返回贴吧标题与回帖列表
