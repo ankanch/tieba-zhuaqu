@@ -71,6 +71,10 @@ def getTitle(html):
         t+=1
     print("\n")
     GV_FINISHED_COUNT[0] += 1
+    dstr = cleanhtml(dstr)
+    dstr = dstr.replace(">","")
+    dstr = dstr.replace("\"","")
+    #dstr = dstr.replace(" ","")
     return t,dstr
 
 #得到帖子的第一页所有回帖，作者以及回帖时间
@@ -79,26 +83,40 @@ def getFirstPage(suburl):
     html = getHtml('http://tieba.baidu.com' + suburl)
     html = html.decode('utf-8','ignore')
     #寻找用户名
-    head = "PageData.thread = {author:\""
-    tail = "\",thread_id :"
+    head = "author:"
+    tail = "thread_id"
     start = html.find(head)
     end = html.find(tail,start)
     postAuthor = html[start+len(head):end]
     #寻找回帖
+    head = " j_d_post_content"
+    tail = "<div class=\"user-hide-post-down\" style=\"display: none;\">"
     start = html.find(head)
     end = html.find(tail,start)
     reply = html[start+len(head):end]
     html = html[end+len(tail):]
-    #reply = onlyCHS(reply)
     reply = cleanhtml(reply)
     #寻找时间
     head = "&quot;date&quot;:&quot;"
     tail = "&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
+    postdate_head_typeB = "楼</span><span class=\"tail-info\">"
+    postdate_tail_typeB = "</span></div><ul class=\"p_props_tail props_appraise_wrap\">"
     start = html.find(head)
     end = html.find(tail,start)
-    postDate = html[start+len(head):end]
-    html = html[end+len(tail):]
-
+    postDate = ""
+    if end < 0 or start < 0 :
+        #在寻找时间的时候没有找到，说明采用了typeB
+        start = html.find(postdate_head_typeB)
+        end = html.find(postdate_tail_typeB)
+        if end < 0 or start < 0 :
+            print("no match for time A and B types")
+            postDate = "1996-10-30 22:58"
+        date = html[start+len(postdate_head_typeB):end]
+        html = html[end+len(postdate_tail_typeB):]
+    else:
+        postDate = html[start+len(head):end]
+        html = html[end+len(tail):]
+    postDate = timeFormater(postDate)
     replydata = ""
     #print("NOT IN WHILE:postAuthor=",postAuthor,"\tpostDate=",postDate,"\treply=",reply)
     #replydata = replydata + reply + "*#*" + postAuthor + "*#*" + postDate +"$#$"
@@ -119,14 +137,16 @@ def getFirstPage(suburl):
     #os.system("pause")
     #下面这个循环用来从所有用户块中匹配出发帖时间，帖子内容，作者信息
     #寻找该页的所有回帖内容
-    head = " j_d_post_content  clearfix\">            "
-    tail = "</div><br></cc><br><div class=\"user-hide-post-down\" style=\"display: none;\"></div>"
+    head = " j_d_post_content"
+    tail = "<div class=\"user-hide-post-down\" style=\"display: none;\">"
     #寻找发帖用户
     username_head="<img username=\""
     username_tail="\" class=\"\" src=\""
-    #寻找发帖时间
+    #寻找发帖时间  ***由于百度贴吧太老，所以有2种时间匹配方式
     postdate_head="&quot;date&quot;:&quot;"
     postdate_tail="&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
+    postdate_head_typeB = "楼</span><span class=\"tail-info\">"
+    postdate_tail_typeB = "</span></div><ul class=\"p_props_tail props_appraise_wrap\">"
     for html in poblock:
         #寻找作者
         start = html.find(username_head)
@@ -142,15 +162,24 @@ def getFirstPage(suburl):
             break
         reply = html[start+len(head):end]
         html = html[end+len(tail):]
-        reply = onlyCHS(reply)
+        reply = cleanhtml(reply)
         #找到了一个回复，接下来寻找作者和发帖时间
         #寻找发帖时间
         start = html.find(postdate_head)
         end = html.find(postdate_tail)
         if end < 0 or start < 0 :
-            break
-        date = html[start+len(postdate_head):end]
-        html = html[end+len(postdate_tail):]
+            #在寻找时间的时候没有找到，说明采用了typeB
+            start = html.find(postdate_head_typeB)
+            end = html.find(postdate_tail_typeB)
+            if end < 0 or start < 0 :
+                print("no match for time A and B types")
+                break
+            date = html[start+len(postdate_head_typeB):end]
+            html = html[end+len(postdate_tail_typeB):]
+        else:
+            date = html[start+len(postdate_head):end]
+            html = html[end+len(postdate_tail):]
+        date = timeFormater(date)
         #os.system("pause")
         replydata = replydata + reply + "*#*" + author + "*#*" + date +"$#$"       
     #返回结果
@@ -235,7 +264,7 @@ def getTieziInfo(suburl):
 
 #该函数用来去掉回帖中无关HTML标签，只保留中文/英文
 #返回值：无HTML标签的回帖数据，如果出错，返回空字符串
-""""该函数存在问题，故注释掉，在以后的更新中，该函数可能会消失，该函数目前已用cleanhtml代替
+"""该函数存在问题，故注释掉，在以后的更新中，该函数可能会消失，该函数目前已用cleanhtml代替
 def onlyCHS(reply):
     #回复里面的多于图片标签
     ex_img_head = "<img"
@@ -322,8 +351,20 @@ def onlyCHS(reply):
     if reply.find("</div>") > -1:
         return ""
     return reply    
-""""
+"""
 
+#下面的函数用来格式化时间字段，避免数据分析模块出错
+def timeFormater(timestr):
+    ss = timestr.replace(" ","")
+    if len(timestr) < 8:
+        ss = "1996-10-30 22:58"
+        print("tbefore=",timestr,"\ttafter=",ss)
+    elif timestr[10] != " ":
+        ss = timestr[:9] + " " + timestr[10:]
+        print("tbefore=",timestr,"\ttafter=",ss)
+    else:
+        ss = timestr
+    return ss
 #该函数用来去掉回帖中无关HTML标签，只保留中文/英文
 #返回值：无HTML标签的回帖数据，如果出错，返回空字符串
 def cleanhtml(reply):
