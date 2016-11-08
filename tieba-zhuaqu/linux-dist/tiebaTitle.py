@@ -88,6 +88,8 @@ def getFirstPage(suburl):
     start = html.find(head)
     end = html.find(tail,start)
     postAuthor = html[start+len(head):end]
+    postAuthor = cleanhtml(postAuthor)
+    postAuthor = clearNonEssential(postAuthor)
     #寻找回帖
     head = " j_d_post_content"
     tail = "<div class=\"user-hide-post-down\" style=\"display: none;\">"
@@ -96,6 +98,7 @@ def getFirstPage(suburl):
     reply = html[start+len(head):end]
     html = html[end+len(tail):]
     reply = cleanhtml(reply)
+    reply = clearNonEssential(reply)
     #寻找时间
     head = "&quot;date&quot;:&quot;"
     tail = "&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
@@ -116,6 +119,7 @@ def getFirstPage(suburl):
     else:
         postDate = html[start+len(head):end]
         html = html[end+len(tail):]
+    postDate = cleanhtml(postDate)
     postDate = timeFormater(postDate)
     replydata = ""
     #print("NOT IN WHILE:postAuthor=",postAuthor,"\tpostDate=",postDate,"\treply=",reply)
@@ -158,6 +162,8 @@ def getFirstPage(suburl):
             break
         author = html[start+len(username_head):end]
         html = html[end+len(username_tail):]
+        author = cleanhtml(author)
+        author = clearNonEssential(author)
         #寻找回帖内容
         start = html.find(head)
         end = html.find(tail,start+len(head))
@@ -166,6 +172,7 @@ def getFirstPage(suburl):
         reply = html[start+len(head):end]
         html = html[end+len(tail):]
         reply = cleanhtml(reply)
+        reply = clearNonEssential(reply)
         #找到了一个回复，接下来寻找作者和发帖时间
         #寻找发帖时间
         start = html.find(postdate_head)
@@ -183,6 +190,7 @@ def getFirstPage(suburl):
             date = html[start+len(postdate_head):end]
             html = html[end+len(postdate_tail):]
         date = timeFormater(date)
+        date = cleanhtml(date)
         if first == True:
             postDate = date
             first = False
@@ -371,6 +379,13 @@ def timeFormater(timestr):
     else:
         ss = timestr
     return ss
+
+#清除不必要信息
+def clearNonEssential(strd):
+    dstr = strd.replace(">","")
+    strd = strd.replace("\"","")
+    strd = strd.replace(" ","")
+    return strd
 #该函数用来去掉回帖中无关HTML标签，只保留中文/英文
 #返回值：无HTML标签的回帖数据，如果出错，返回空字符串
 def cleanhtml(reply):

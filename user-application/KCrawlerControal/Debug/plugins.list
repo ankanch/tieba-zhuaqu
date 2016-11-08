@@ -1,4 +1,4 @@
 下面是一个测试插件
 KCCPLUGINS=对比统计多个词语=对比统计多个词语的频率，并以直方图的形式显示=multiwords.py
 KCCPLUGINS=搜索指定关键字=枚举出所有出现指定关键字的数据项=singleword.py
-KCCPLUGINS=统计词频变化=统计指定词语的频率随时间的变化，并以折线图显示=wordstimeliner.py
+KCCPLUGINS=统计词频变化=统计指定词语的频率随时间的变化，并以折线图显示=\wordstimeline\main.py

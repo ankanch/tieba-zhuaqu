@@ -93,6 +93,11 @@ void KCCPlugins::setupBasicInfo()
 
 }
 
+void KCCPlugins::SearchPlugs()
+{
+		
+}
+
 
 
 BEGIN_MESSAGE_MAP(KCCPlugins, CDialogEx)
@@ -108,6 +113,7 @@ BOOL KCCPlugins::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
+	SearchPlugs();
 	setupBasicInfo();
 	loadPlugins();
 

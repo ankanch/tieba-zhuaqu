@@ -34,6 +34,7 @@ public:
 	Plugin *pluginlist;
 	void loadPlugins();   //加载插件（包括创建按钮与关联按钮事件）
 	void setupBasicInfo();  //设置任务的基本信息
+	void SearchPlugs();   //新版插件设置，直接搜索plugin目录
 						  // 显示插件信息的列表框控件
 	CComboBox m_pluginslist;
 	virtual BOOL OnInitDialog();
