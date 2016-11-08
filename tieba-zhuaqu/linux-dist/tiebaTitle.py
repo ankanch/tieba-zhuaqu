@@ -71,9 +71,9 @@ def getTitle(html):
         t+=1
     print("\n")
     GV_FINISHED_COUNT[0] += 1
-    dstr = cleanhtml(dstr)
-    dstr = dstr.replace(">","")
-    dstr = dstr.replace("\"","")
+    #dstr = cleanhtml(dstr)
+    #dstr = dstr.replace(">","")
+    #dstr = dstr.replace("\"","")
     #dstr = dstr.replace(" ","")
     return t,dstr
 
@@ -134,6 +134,8 @@ def getFirstPage(suburl):
         poblock.append(userblock)
         html = html[ibseb+len(BLOCK_START_END):]
     print(len(poblock),end="")
+    if len(poblock) == 0:
+        postDate = "1996-10-30 22:58"
     #os.system("pause")
     #下面这个循环用来从所有用户块中匹配出发帖时间，帖子内容，作者信息
     #寻找该页的所有回帖内容
@@ -147,6 +149,7 @@ def getFirstPage(suburl):
     postdate_tail="&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
     postdate_head_typeB = "楼</span><span class=\"tail-info\">"
     postdate_tail_typeB = "</span></div><ul class=\"p_props_tail props_appraise_wrap\">"
+    first = True
     for html in poblock:
         #寻找作者
         start = html.find(username_head)
@@ -180,6 +183,9 @@ def getFirstPage(suburl):
             date = html[start+len(postdate_head):end]
             html = html[end+len(postdate_tail):]
         date = timeFormater(date)
+        if first == True:
+            postDate = date
+            first = False
         #os.system("pause")
         replydata = replydata + reply + "*#*" + author + "*#*" + date +"$#$"       
     #返回结果
@@ -358,10 +364,10 @@ def timeFormater(timestr):
     ss = timestr.replace(" ","")
     if len(timestr) < 8:
         ss = "1996-10-30 22:58"
-        print("tbefore=",timestr,"\ttafter=",ss)
+        #print("tbefore=",timestr,"\ttafter=",ss)
     elif timestr[10] != " ":
         ss = timestr[:9] + " " + timestr[10:]
-        print("tbefore=",timestr,"\ttafter=",ss)
+        #print("tbefore=",timestr,"\ttafter=",ss)
     else:
         ss = timestr
     return ss
