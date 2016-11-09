@@ -25,6 +25,9 @@ Visual Studio 2015
 
 [jieba中文分词](https://github.com/fxsjy/jieba)：用于中文分词以及关键字提取
 
+##数据分析模块##
+
+**测试数据下载地址：http://pan.cuit.edu.cn/share/gOfO3tEB （提取码：yJ1t）
 
 ##开发状态##
 
