@@ -1,14 +1,19 @@
 from tkinter import *           # 导入 Tkinter 库
 import wordstimeliner
-root = Tk()                     # 创建窗口对象的背景色
+root = Tk()                  
 root.resizable(False,False)
 root.title("时间频率图")
 
+#KCC基本分析组件
+#该组件用于统计某个词语的频率变化并以折线统计图的形式显示
+##插件信息定义
+KCC_PLUGIN_NAME="WordTimeliner"
+KCC_PLUGIN_DESCRIPTION="显示指定词语的时间频率图"
+KCC_PLUGIN_COPYRIGHT="kanch"
+##定义结束
+
 def btnclick():
     root.update()
-    #下面这种方法不知道为什么会不行有些时候
-    #word = data.get()
-    #SCALE = scale.get()
     word = wordentry.get()
     SCALE = daysentry.get()
     print("word=",word,"\tSCALE=",SCALE)

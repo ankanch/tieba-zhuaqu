@@ -6,6 +6,7 @@
 #include "KCCPlugins.h"
 #include "afxdialogex.h"
 #include <locale.h>
+#include "KCrawlerControalDlg.h"
 
 
 // KCCPlugins 对话框
@@ -29,6 +30,7 @@ void KCCPlugins::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2, m_pluginslist);
 }
 
+//该函数为老版插件搜索函数，已经被弃用，将会在未来的版本更新中消失。
 void KCCPlugins::loadPlugins()
 {
 	CStdioFile cfg;
@@ -93,9 +95,105 @@ void KCCPlugins::setupBasicInfo()
 
 }
 
-void KCCPlugins::SearchPlugs()
+CString KCCPlugins::SearchPlugs()
 {
-		
+	CFileFind finder;
+	BOOL bWorking = finder.FindFile(_T(".\\plugins\\*.*"));
+	CString pluginsData;
+	while (bWorking)
+	{
+		bWorking = finder.FindNextFile();
+		if (finder.IsDots())
+			continue;
+		CString foldername = (LPCTSTR)finder.GetFileName();
+		//MessageBox(foldername);
+		//理论上讲插件都在文件夹里面，所以，这里我们要判断是不是文件夹
+		if (finder.IsDirectory())
+		{
+			//MessageBox(_T("搜索main.py"), _T("发现目录..."), MB_ICONINFORMATION);
+			CFileFind findmain;
+			CString mainpath = _T(".\\plugins\\") + foldername + _T("\\main.py");
+			if (findmain.FindFile(mainpath))
+			{
+				//读取插件信息，插件信息由以下3个字段定义，定义在main.py文件里面
+				//KCC_PLUGIN_NAME：定义了插件名字
+				//KCC_PLUGIN_DESCRIPTION：定义了插件描述
+				//KCC_PLUGIN_COPYRIGHT：定义了插件作者以及版权信息
+				CStdioFile readinfo;
+				readinfo.Open(mainpath, CFile::modeRead);
+				//MessageBox(_T("XXXXXXXXXXXXXXXXXXXX"), _T("找到可用插件"), MB_ICONINFORMATION);
+				CString line;
+				CString NAME = foldername, DES = _T(""), CR=_T("未知作者");
+				int findcount = 0;
+				while (readinfo.ReadString(line))
+				{
+					CKCCDlg kccdlg;
+					line = kccdlg.UTF8_TO_GBK((char*)line.GetBuffer(0));
+					if (findcount == 3)
+					{
+						break;
+					}
+					if (line.Find(_T("KCC_PLUGIN_NAME")) >= 0)
+					{
+						NAME = line.Right(line.GetLength() - line.Find(_T("=")) - 1);
+						findcount++;
+					}
+					if (line.Find(_T("KCC_PLUGIN_DESCRIPTION")) >= 0)
+					{
+						DES = line.Right(line.GetLength() - line.Find(_T("=")) - 1);
+						findcount++;
+					}
+					if (line.Find(_T("KCC_PLUGIN_COPYRIGHT")) >= 0)
+					{
+						CR = line.Right(line.GetLength() - line.Find(_T("=")) - 1);
+						findcount++;
+					}
+				}
+				pluginsData += NAME + _T("=") + DES + _T("=") + CR + _T("=") + foldername + _T("\\main.py#");
+				readinfo.Close();
+			}
+		}
+	}
+
+	//插件搜索完毕，信息都储存在pluginsData中
+	return pluginsData;
+}
+
+void KCCPlugins::LoadPluginsNV()
+{
+	CString pluginsData = SearchPlugs();
+	MessageBox(pluginsData);
+	int pluginscount = 0;
+	for (int i = 0; i < pluginsData.GetLength(); i++)
+	{
+		if (pluginsData[i] == CString(_T("#")))
+		{
+			pluginscount++;
+		}
+	}
+	pluginlist = new Plugin[pluginscount];
+	for (int i = 0; i < pluginscount; i++)
+	{
+		CString NAME, DES, CP, PATH;
+		NAME = pluginsData.Left(pluginsData.Find(_T("=")));
+		pluginsData = pluginsData.Right(pluginsData.GetLength() - pluginsData.Find(_T("=")) - 1);
+		DES = pluginsData.Left(pluginsData.Find(_T("=")));
+		pluginsData = pluginsData.Right(pluginsData.GetLength() - pluginsData.Find(_T("=")) - 1);
+		CP = pluginsData.Left(pluginsData.Find(_T("=")));
+		pluginsData = pluginsData.Right(pluginsData.GetLength() - pluginsData.Find(_T("=")) - 1);
+		PATH = pluginsData.Left(pluginsData.Find(_T("#")));
+		pluginsData = pluginsData.Right(pluginsData.GetLength() - pluginsData.Find(_T("#")) - 1);
+		//保存信息到数组中方便执行
+		pluginlist[i].name = NAME;
+		pluginlist[i].descri = DES;
+		pluginlist[i].exefilename = PATH;
+		MessageBox(PATH, NAME);
+		//添加到列表框中
+		CString liststr = NAME + _T("->") + DES;
+		m_pluginslist.AddString(liststr);
+	}
+
+
 }
 
 
@@ -113,9 +211,8 @@ BOOL KCCPlugins::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
-	SearchPlugs();
+	LoadPluginsNV();
 	setupBasicInfo();
-	loadPlugins();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE

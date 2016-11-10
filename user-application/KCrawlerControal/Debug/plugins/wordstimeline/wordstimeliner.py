@@ -4,10 +4,10 @@ import lib.graphicsData as drawGraphic
 import datetime
 import numpy
 
-#这个库是用来统计某个词语的频率变化并以折线统计图的形式显示
-#这是tieba-zhuaqu项目的用户端基本插件
+#KCC基本分析组件
+#该组件用于统计某个词语的频率变化并以折线统计图的形式显示
 
-#该函数是可定义的显示函数（慎用）
+#该函数是可定义的显示函数（慎用
 #参数说明：word：要统计的词语 scale：时间段（单位：天） datelist：贴吧帖子元数据
 def singleWordTF(word,datalist,scale=30):
     #实现解析时间线，获取最小最大时间范围
