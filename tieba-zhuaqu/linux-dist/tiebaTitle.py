@@ -382,10 +382,11 @@ def timeFormater(timestr):
 
 #清除不必要信息
 def clearNonEssential(strd):
-    dstr = strd.replace(">","")
-    strd = strd.replace("\"","")
-    strd = strd.replace(" ","")
-    return strd
+    nonesslist = [">","\""," ",",","\n","\r"]
+    dstr = strd
+    for item in nonesslist:
+        dstr = dstr.replace(item,"")
+    return dstr
 #该函数用来去掉回帖中无关HTML标签，只保留中文/英文
 #返回值：无HTML标签的回帖数据，如果出错，返回空字符串
 def cleanhtml(reply):
