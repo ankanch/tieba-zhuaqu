@@ -81,11 +81,27 @@ def showLastDays(word,days):
     timeline = []
     x = 0
     xdate = begdate
-    while x < days: #初始化频率数组
-        feqlist.append(0)
+    if days > 30:
         timeline.append(str(xdate.month)+"-"+str(xdate.day))
         xdate += datetime.timedelta(days=1)
-        x+=1
+        x += 1
+        while x<=days:
+            feqlist.append(0)
+            if x%2 == 0:
+                timeline.append(str(xdate.month)+"-"+str(xdate.day))
+            else:
+                timeline.append("")
+            xdate += datetime.timedelta(days=1)
+            x+=1
+        if x%2 == 0:
+            xdate -= datetime.timedelta(days=1)
+            timeline[len(timeline)] == str(xdate.date())
+    else:
+        while x < days: #初始化频率数组
+            feqlist.append(0)
+            timeline.append(str(xdate.month)+"-"+str(xdate.day))
+            xdate += datetime.timedelta(days=1)
+            x+=1
     #sposdate：[ [内容,作者,时间],[......],...... ]
     for post in spostdate:
         if post[0].find(word) > -1:
