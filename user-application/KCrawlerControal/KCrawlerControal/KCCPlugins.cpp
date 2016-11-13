@@ -162,7 +162,7 @@ CString KCCPlugins::SearchPlugs()
 void KCCPlugins::LoadPluginsNV()
 {
 	CString pluginsData = SearchPlugs();
-	MessageBox(pluginsData);
+	///MessageBox(pluginsData);
 	int pluginscount = 0;
 	for (int i = 0; i < pluginsData.GetLength(); i++)
 	{
@@ -187,7 +187,6 @@ void KCCPlugins::LoadPluginsNV()
 		pluginlist[i].name = NAME;
 		pluginlist[i].descri = DES;
 		pluginlist[i].exefilename = PATH;
-		MessageBox(PATH, NAME);
 		//添加到列表框中
 		CString liststr = NAME + _T("->") + DES;
 		m_pluginslist.AddString(liststr);
