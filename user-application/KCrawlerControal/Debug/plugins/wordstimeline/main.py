@@ -1,4 +1,5 @@
 from tkinter import *           # 导入 Tkinter 库
+import tkinter.ttk as ttk
 import wordstimeliner
 root = Tk()                  
 root.resizable(False,False)
@@ -16,8 +17,16 @@ def btnclick():
     root.update()
     word = wordentry.get()
     SCALE = daysentry.get()
-    print("word=",word,"\tSCALE=",SCALE)
-    wordstimeliner.showLastDays(word,int(SCALE))
+    scaletype = datascaleelem.get()
+    print("word=",word,"\tSCALE=",SCALE,",\tscale type=",scaletype)
+    if scaletype == "天":
+        wordstimeliner.showLastDays(word,int(SCALE))
+    elif scaletype == "月":
+        wordstimeliner.showLastMonths(word,int(SCALE))
+    elif scaletype == "年":
+        wordstimeliner.showLastYears(word,int(SCALE))
+    else:
+        print("出现未知错误：无法正常选择日期！")
 
 def centerWindow(rt):
     rt.update() # update window ,must do
@@ -29,13 +38,20 @@ def centerWindow(rt):
     (scnWidth-curWidth)/2,(scnHeight-curHeight)/2)
     rt.geometry(tmpcnf)
     return rt
-
+    
 data = StringVar(root)
 scale = IntVar(root)
 Label(root,text="KCC数据分析模块 - 基本分析套件\n该模块用于显示指定词语的时间频率关系图",width=35,height=5).pack()
 Label(root,text="请输入要分析的词语（仅一个）:",width=25,height=2).pack()
 wordentry = Entry(root,text="请输入内容",width=25,textvariable=data)
 wordentry.pack(ipadx=4,ipady=4)
+Label(root,text="数据精细程度:",width=25,height=2).pack()
+variable = StringVar(root)
+datascaleelem = ttk.Combobox(root, textvariable=variable, values=["天", "月", "年"],state='readonly')
+datascaleelem["values"] = ("天", "月", "年")  
+datascaleelem.current(0)  
+#datascaleelem.bind("<<ComboboxSelected>>", getScaleElem)  
+datascaleelem.pack()
 Label(root,text="请输入显示最近多少天的统计图:",width=25,height=2).pack()
 daysentry = Entry(root,text="请输显示多少天的",width=25,relief=GROOVE,textvariable=scale)
 daysentry.pack(ipadx=4,ipady=4)

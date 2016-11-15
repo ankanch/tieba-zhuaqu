@@ -125,10 +125,24 @@ def showLastMonths(word,months):
     x = 0
     xdate = begdate
     while x < months: #初始化频率数组
+        ommit_xlabel_per = months/24  #忽略x label的个数
+        ommit_xlabel_per-=1  #同上
         feqlist.append(0)
         timeline.append(str(xdate.month)+"月")
+        if xdate.month == 1:
+            timeline[len(timeline)-1] = str(xdate.year)+"年-" + timeline[len(timeline)-1]
         xdate += datetime.timedelta(days=30)
         x+=1
+        ppp = 0
+        while ppp < ommit_xlabel_per and x < months:
+            feqlist.append(0)
+            timeline.append("")
+            if xdate.month == 1:
+                timeline[len(timeline)-1] = str(xdate.year)+"年-" + timeline[len(timeline)-1]
+            xdate += datetime.timedelta(days=30)
+            ppp+=1
+            x+=1
+
     #sposdate：[ [内容,作者,时间],[......],...... ]
     for post in spostdate:
         if post[0].find(word) > -1:
@@ -170,7 +184,7 @@ def showLastYears(word,years):
 def extrenSingleWordTF():
     word = input("请输入要统计的词语：")
     scale = int(input("输入天/月/年："))
-    showLastDays(word,scale)
+    #showLastDays(word,scale)
     #showLastMonths(word,scale)
     #showLastYears(word,scale)
     #singleWordTF(word,RFF.getPostDataList(),scale)
