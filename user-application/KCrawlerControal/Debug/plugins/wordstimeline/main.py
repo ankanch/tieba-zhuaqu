@@ -55,7 +55,7 @@ datascaleelem.pack()
 Label(root,text="请输入显示最近多少天的统计图:",width=25,height=2).pack()
 daysentry = Entry(root,text="请输显示多少天的",width=25,relief=GROOVE,textvariable=scale)
 daysentry.pack(ipadx=4,ipady=4)
-Button(root, text="获取edit内容", width=15,relief=GROOVE,command=btnclick).pack(pady=16,ipadx=8,ipady=8)
+Button(root, text="显示结果", width=15,relief=GROOVE,command=btnclick).pack(pady=16,ipadx=8,ipady=8)
 
 root = centerWindow(root)
 root.mainloop()                 # 进入消息循环

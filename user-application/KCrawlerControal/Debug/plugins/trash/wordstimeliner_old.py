@@ -4,10 +4,10 @@ import lib.graphicsData as drawGraphic
 import datetime
 import numpy
 
-#KCC基本分析组件
-#该组件用于统计某个词语的频率变化并以折线统计图的形式显示
+#这个库是用来统计某个词语的频率变化并以折线统计图的形式显示
+#这是tieba-zhuaqu项目的用户端基本插件
 
-#该函数是可定义的显示函数（慎用
+#该函数是可定义的显示函数（慎用）
 #参数说明：word：要统计的词语 scale：时间段（单位：天） datelist：贴吧帖子元数据
 def singleWordTF(word,datalist,scale=30):
     #实现解析时间线，获取最小最大时间范围
@@ -81,36 +81,18 @@ def showLastDays(word,days):
     timeline = []
     x = 0
     xdate = begdate
-    if days > 30:
-        ommit_xlabel_per = days/30  #忽略x label的个数
-        ommit_xlabel_per-=1  #同上
-        while x<=days:
-            feqlist.append(0)
-            timeline.append(str(xdate.month)+"-"+str(xdate.day))
-            xdate += datetime.timedelta(days=1)
-            x+=1
-            ppp = 0
-            while ppp < ommit_xlabel_per and x <= days:
-                feqlist.append(0)
-                timeline.append("")
-                xdate += datetime.timedelta(days=1)
-                x+=1
-                ppp+=1
-        xdate -= datetime.timedelta(days=1)
-        timeline[len(timeline)-1] == str(xdate.date())
-    else:
-        while x < days: #初始化频率数组
-            feqlist.append(0)
-            timeline.append(str(xdate.month)+"-"+str(xdate.day))
-            xdate += datetime.timedelta(days=1)
-            x+=1
+    while x < days: #初始化频率数组
+        feqlist.append(0)
+        timeline.append(str(xdate.month)+"-"+str(xdate.day))
+        xdate += datetime.timedelta(days=1)
+        x+=1
     #sposdate：[ [内容,作者,时间],[......],...... ]
     for post in spostdate:
         if post[0].find(word) > -1:
             satpos = (datetime.datetime.strptime(post[2], "%Y-%m-%d %H:%M") - begdate).days
             feqlist[satpos-1]+=1
     #开始绘图
-    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,"【"+ word +'】的时间频率图('+ str(begdate.date()) + "->" + str(enddate.date()) +")")
+    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,'时间频率图('+ str(begdate.date()) + "->" + str(enddate.date()) +")")
     print('>>>>>图像加载完毕')
     
 
@@ -125,31 +107,17 @@ def showLastMonths(word,months):
     x = 0
     xdate = begdate
     while x < months: #初始化频率数组
-        ommit_xlabel_per = months/24  #忽略x label的个数
-        ommit_xlabel_per-=1  #同上
         feqlist.append(0)
         timeline.append(str(xdate.month)+"月")
-        if xdate.month == 1:
-            timeline[len(timeline)-1] = str(xdate.year)+"年-" + timeline[len(timeline)-1]
         xdate += datetime.timedelta(days=30)
         x+=1
-        ppp = 0
-        while ppp < ommit_xlabel_per and x < months:
-            feqlist.append(0)
-            timeline.append("")
-            if xdate.month == 1:
-                timeline[len(timeline)-1] = str(xdate.year)+"年-" + timeline[len(timeline)-1]
-            xdate += datetime.timedelta(days=30)
-            ppp+=1
-            x+=1
-
     #sposdate：[ [内容,作者,时间],[......],...... ]
     for post in spostdate:
         if post[0].find(word) > -1:
             satpos = int(((datetime.datetime.strptime(post[2], "%Y-%m-%d %H:%M") - begdate).days)/30)
             feqlist[satpos-1]+=1
     #开始绘图
-    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,"【"+ word +'】的时间频率图(' + str(begdate.date()) + "->" + str(enddate.date()) +")")
+    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,'时间频率图('+ str(begdate.date()) + "->" + str(enddate.date()) +")")
     print('>>>>>图像加载完毕')
 
 #该函数用来显示过去指定年的词频变化
@@ -177,14 +145,14 @@ def showLastYears(word,years):
             print("satpos=",satpos,"\tpostdate=",postdate,"\tbegdate=",begdate,"\tyear1=",postdate.year,"\tyear2=",begdate.year)
             feqlist[satpos]+=1
     #开始绘图
-    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,"【"+ word +'】的时间频率图('+ str(begdate.year) + "->" + str(enddate.year) +")")
+    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,'时间频率图('+ str(begdate.year) + "->" + str(enddate.year) +")")
     print('>>>>>图像加载完毕')
 
 #该函数用于从外部执行
 def extrenSingleWordTF():
     word = input("请输入要统计的词语：")
     scale = int(input("输入天/月/年："))
-    #showLastDays(word,scale)
+    showLastDays(word,scale)
     #showLastMonths(word,scale)
     #showLastYears(word,scale)
     #singleWordTF(word,RFF.getPostDataList(),scale)
@@ -200,4 +168,6 @@ def getTimeDomain(datelist):
 def toDatetime(datastr):
     return datelist.append(datetime.datetime.strptime(datastr, "%Y-%m-%d %H:%M"))
     
-    
+
+#逻辑
+extrenSingleWordTF()
