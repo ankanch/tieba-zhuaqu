@@ -8,7 +8,9 @@
 ##语言及环境##
 
 Python3.5.1
+
 C++
+
 Visual Studio 2015
 ######建议你安装64位的python，否则可能会出现memory error######
 ###文件结构###
@@ -35,15 +37,15 @@ Visual Studio 2015
 
 目前自带的数据分析插件可以完成以下几种类型的分析：
 
-![](../README/figure_1.png)
+![](https://github.com/ankanch/tieba-zhuaqu/raw/master/README/figure_1.png)
 
 对比统计多个词语（multiwords）
 
-![](../README/figure_2.png)
+![](https://github.com/ankanch/tieba-zhuaqu/raw/master/README/figure_2.png)
 
-![](../README/figure_2-2.png)
+![](https://github.com/ankanch/tieba-zhuaqu/raw/master/README/figure_2-2.png)
 
-![](../README/figure_2-3.png)
+![](https://github.com/ankanch/tieba-zhuaqu/raw/master/README/figure_2-3.png)
 
 显示某个词语的词频-时间图（wordstimeline）
 
