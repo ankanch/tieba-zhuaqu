@@ -82,20 +82,22 @@ def showLastDays(word,days):
     x = 0
     xdate = begdate
     if days > 30:
-        timeline.append(str(xdate.month)+"-"+str(xdate.day))
-        xdate += datetime.timedelta(days=1)
-        x += 1
+        ommit_xlabel_per = days/30  #忽略x label的个数
+        ommit_xlabel_per-=1  #同上
         while x<=days:
             feqlist.append(0)
-            if x%2 == 0:
-                timeline.append(str(xdate.month)+"-"+str(xdate.day))
-            else:
-                timeline.append("")
+            timeline.append(str(xdate.month)+"-"+str(xdate.day))
             xdate += datetime.timedelta(days=1)
             x+=1
-        if x%2 == 0:
-            xdate -= datetime.timedelta(days=1)
-            timeline[len(timeline)] == str(xdate.date())
+            ppp = 0
+            while ppp < ommit_xlabel_per and x <= days:
+                feqlist.append(0)
+                timeline.append("")
+                xdate += datetime.timedelta(days=1)
+                x+=1
+                ppp+=1
+        xdate -= datetime.timedelta(days=1)
+        timeline[len(timeline)-1] == str(xdate.date())
     else:
         while x < days: #初始化频率数组
             feqlist.append(0)
@@ -108,7 +110,7 @@ def showLastDays(word,days):
             satpos = (datetime.datetime.strptime(post[2], "%Y-%m-%d %H:%M") - begdate).days
             feqlist[satpos-1]+=1
     #开始绘图
-    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,'时间频率图('+ str(begdate.date()) + "->" + str(enddate.date()) +")")
+    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,"【"+ word +'】的时间频率图('+ str(begdate.date()) + "->" + str(enddate.date()) +")")
     print('>>>>>图像加载完毕')
     
 
@@ -133,7 +135,7 @@ def showLastMonths(word,months):
             satpos = int(((datetime.datetime.strptime(post[2], "%Y-%m-%d %H:%M") - begdate).days)/30)
             feqlist[satpos-1]+=1
     #开始绘图
-    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,'时间频率图('+ str(begdate.date()) + "->" + str(enddate.date()) +")")
+    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,"【"+ word +'】的时间频率图(' + str(begdate.date()) + "->" + str(enddate.date()) +")")
     print('>>>>>图像加载完毕')
 
 #该函数用来显示过去指定年的词频变化
@@ -161,7 +163,7 @@ def showLastYears(word,years):
             print("satpos=",satpos,"\tpostdate=",postdate,"\tbegdate=",begdate,"\tyear1=",postdate.year,"\tyear2=",begdate.year)
             feqlist[satpos]+=1
     #开始绘图
-    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,'时间频率图('+ str(begdate.year) + "->" + str(enddate.year) +")")
+    drawGraphic.linePlotGraphics('时间','出现次数（帖子/回帖总数：'+str(len(spostdate))+')',timeline,feqlist,"【"+ word +'】的时间频率图('+ str(begdate.year) + "->" + str(enddate.year) +")")
     print('>>>>>图像加载完毕')
 
 #该函数用于从外部执行
