@@ -1,6 +1,8 @@
 #百度贴吧分布式爬虫#
 ##简介##
-该分布式爬虫可以抓取贴吧帖子内容并进行相关分析
+该分布式爬虫可以抓取贴吧帖子内容并进行相关数据分析（详情见数据分析示例）。
+
+目前该系统内部自带了4个插件用于数据分析，你可以给它贡献更多插件（插件由Python编写）
 
 该爬虫系统主要由3部分组成：TaskManager任务管理服务器，KCrawlerManager用户端管理软件（KCrawlerController），Cralwer爬虫程序
 ##语言及环境##
@@ -28,6 +30,23 @@ Visual Studio 2015
 ##数据分析模块##
 
 **测试数据下载地址：[http://pan.cuit.edu.cn/share/7FF9yiO5](http://pan.cuit.edu.cn/share/7FF9yiO5) （提取码：Yp32）
+
+###数据分析示例###
+
+目前自带的数据分析插件可以完成以下几种类型的分析：
+
+![](../README/figure_1.png)
+
+对比统计多个词语（multiwords）
+
+![](../README/figure_2.png)
+
+![](../README/figure_2-2.png)
+
+![](../README/figure_2-3.png)
+
+显示某个词语的词频-时间图（wordstimeline）
+
 
 ##开发状态##
 
