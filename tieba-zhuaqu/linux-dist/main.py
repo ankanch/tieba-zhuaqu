@@ -83,7 +83,7 @@ tc -= minutes*60
 timscost = str(days) + " days," + str(hours) + " hours," + str(minutes) + " minutes," + str(tc) + " seconds. (total:" + str(totalseconds) + "seconds)"
 #邮件正文
 Title = "Download Success! Finised on " + str(now) + '.'
-line1 = "Tieba job created on " + str(createdtime) + " now has been finised!\r\n=========================\r\nSummary\r\n\r\n"
+line1 = "Tieba job(" + tieba_name +" )created on " + str(createdtime) + " now has been finised!\r\n=========================\r\nSummary\r\n\r\n"
 line2 = "\r\nJob Created on: \t"+str(createdtime)+'\r\nJob finished on: \t'+str(now) +"\r\nPieces of data retrived:   " + str(sum) +"\r\nTime cost: \t" + timscost
 line3 = "\r\n\r\n\r\n This mail is send by Kanch's PythonBot @ AmazonECS\r\n=========================\r\n"
 Content = line1 + line2 + line3

@@ -14,7 +14,7 @@ GV_POCESSSUM = []
 page = 0
 x=0
 max_page = 0
-pocessList=[]
+#pocessList=[]  #用来存放下载的HTML，但为了减少内存占用，现在已经改为存放在文件里面。
 
 GV_ERROR_THREAD_DATA = []   #该变量用来储存出错线程数据，包括线程编号，当前线程下载位置，线程目标下载位置（里面储存的是list，按照该顺序排列）
 
@@ -127,7 +127,7 @@ def getFirstPage(suburl):
         start = html.find(postdate_head_typeB)
         end = html.find(postdate_tail_typeB)
         if end < 0 or start < 0 :
-            print("no match for time A and B types")
+            print("NMT-ERRORS",end="")
             postDate = "1996-10-30 22:58"
         date = html[start+len(postdate_head_typeB):end]
         html = html[end+len(postdate_tail_typeB):]
@@ -260,7 +260,8 @@ def downloadPage(psum,count,begURL,beg=0):
         try:
             print('>>>>>线程 '+str(count)+'：当前正在下载第【',str(x + 1)+'/'+str(psum),'】页数据')
             html = getHtml(begURL + str(page))
-            pocessList.append(html)
+            #pocessList.append(html)
+            saveToFile(html,count,x+1) #为了减小内存暂用，我们将其放入文件
         except Exception:
             print('>>错误->线程 '+str(count)+'：在下载第【',str(x + 1)+'/'+str(psum),'】页数据时出错！程序将会重试。*****下载出错。')
             GV_ERROR_THREAD_DATA.append([count,x,psum])   #返回出错页面和下载总数
@@ -286,11 +287,14 @@ def pocessDataList(GV_COUNT,begURL):
     NO_OUT = True
     exit_sum = 0
     while NO_OUT: 
-        if( len(pocessList) > 0 ) :
+        htmldata = readSavedHTML()
+        #if( len(pocessList) > 0 ) :
+        if( htmldata != "ERROR" ) :
             count += 1
             print('>>>>>当前正在处理第【',count,'】页的帖子,已抓取',titlesum,'条数据.....',end=' ')
-            m , dstr= getTitle(pocessList[0].decode('utf-8','ignore'))
-            del pocessList[0]
+            #m , dstr= getTitle(pocessList[0].decode('utf-8','ignore'))
+            #del pocessList[0]
+            m , dstr= getTitle(htmldata.decode('utf-8','ignore'))
             titlelist += dstr
             titlesum += m
             x = 0
@@ -317,7 +321,19 @@ def pocessDataList(GV_COUNT,begURL):
 #以下2个函数的目地是为了减少程序的内存占用。
 #该函数用来从文件中读取已经下载的HTML数据，然后在将其清空。
 def readSavedHTML():
-    pass
+    dlcachepath  = ".//dlcache//"
+    flist = os.listdir(dlcachepath)
+    if len(flist) == 0:
+        return "ERROR"
+    f = open(dlcachepath+flist[0],"rb")
+    htmldata = f.read()
+    f.close()
+    delfilecmd = "rm .//dlcache//" + flist[0]
+    os.system(delfilecmd)
+    return htmldata
 #该函数用于将下载的HTML数据写入文件
-def saveToFile():
-    pass
+def saveToFile(htmldata,threadcount,fnum):
+    filename = ".//dlcache//" + str(threadcount) + "-" + str(fnum)
+    f = open(filename,"wb")
+    f.write(htmldata)
+    f.close()
