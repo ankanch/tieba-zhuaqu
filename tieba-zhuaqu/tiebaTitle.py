@@ -231,7 +231,7 @@ def timeFormater(timestr):
 
 #清除不必要信息
 def clearNonEssential(strd):
-    nonesslist = [">","\""," ",",","\n","\r"]
+    nonesslist = [">","\""," ",",","\n","\r","clearfix"]
     dstr = strd
     for item in nonesslist:
         dstr = dstr.replace(item,"")
@@ -314,7 +314,10 @@ def pocessDataList(GV_COUNT,begURL):
     return titlesum,titlelist
 
 
-#该函数用来处理每一条帖子的第一页信息
-def dispatchPocessSuburl():
+#以下2个函数的目地是为了减少程序的内存占用。
+#该函数用来从文件中读取已经下载的HTML数据，然后在将其清空。
+def readSavedHTML():
     pass
-
+#该函数用于将下载的HTML数据写入文件
+def saveToFile():
+    pass

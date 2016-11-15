@@ -57,7 +57,9 @@ def getTitle(html):
     replydata = ""
     for dta in titlelist:
         #匹配帖子标题
-        #print(t,'/',sum,"",end=" ")
+        nextpage = ""
+        psum = 0
+        firstfloor = True
         print("#",end="")
         sys.stdout.flush()
         k = re.sub("<a href=\"/p/.*?class=\"j_th_tit \">","",dta)
@@ -65,16 +67,20 @@ def getTitle(html):
         #匹配帖子地址,用来获得作者和发帖时间
         postUrl = re.sub("<a href=\"","",dta)
         postUrl = re.sub("\" title=.*?class=\"j_th_tit \">.*?</a>","",postUrl)
-        #author , date , replydata = getTieziInfo(postUrl)
-        author , date , replydata = getFirstPage(postUrl)
-        dstr = dstr + '\r\n\t\t' + k + "*#*" + author + "*#*" + date + "@#@" + replydata
-        t+=1
+        while nextpage != "NULL": #抓取一个帖子的所有页面
+            #print("postURL=",postUrl)
+            psum , author , date , replydata , nextpage= getFirstPage(postUrl)
+            postUrl = nextpage
+            if firstfloor == True:
+                dstr = dstr + '\r\n\t\t' + k + "*#*" + author + "*#*" + date + "@#@" + replydata
+                firstfloor = False
+            else:
+                dstr = dstr + replydata
+            t+=psum
+        #dstr = dstr + '\r\n\t\t' + k + "*#*" + author + "*#*" + date + "@#@" + replydata
+        t += 1
     print("\n")
     GV_FINISHED_COUNT[0] += 1
-    #dstr = cleanhtml(dstr)
-    #dstr = dstr.replace(">","")
-    #dstr = dstr.replace("\"","")
-    #dstr = dstr.replace(" ","")
     return t,dstr
 
 #得到帖子的第一页所有回帖，作者以及回帖时间
@@ -82,6 +88,15 @@ def getTitle(html):
 def getFirstPage(suburl):
     html = getHtml('http://tieba.baidu.com' + suburl)
     html = html.decode('utf-8','ignore')
+    #首先寻找是否有下一页
+    NEXT_PAGE = ">下一页</a>" 
+    nextpage_pos = html.find(NEXT_PAGE)
+    nextpage = html[nextpage_pos-29:nextpage_pos-1]
+    nextpage = nextpage[nextpage.find("\"")+1:]
+    if nextpage_pos == -1:
+        nextpage = "NULL"
+    #print("nextpage_pos=",nextpage_pos,nextpage)
+    #os.system("pause")
     #寻找用户名
     head = "author:"
     tail = "thread_id"
@@ -154,6 +169,7 @@ def getFirstPage(suburl):
     postdate_head_typeB = "楼</span><span class=\"tail-info\">"
     postdate_tail_typeB = "</span></div><ul class=\"p_props_tail props_appraise_wrap\">"
     first = True
+    psum = 0
     for html in poblock:
         #寻找作者
         start = html.find(username_head)
@@ -195,177 +211,10 @@ def getFirstPage(suburl):
             postDate = date
             first = False
         #os.system("pause")
+        psum+=1
         replydata = replydata + reply + "*#*" + author + "*#*" + date +"$#$"       
     #返回结果
-    return postAuthor , postDate , replydata
-
-##
-#得到帖子的具体信息，包括发贴日期和发帖用户以及第一页里面的回帖,
-"""该函数存在问题，故注释掉，在以后的更新中，该函数可能会消失，该函数目前已用getFirstPage代替
-def getTieziInfo(suburl):
-    html = getHtml('http://tieba.baidu.com' + suburl)
-    html = html.decode('utf-8','ignore')
-    #寻找用户名
-    head = "PageData.thread = {author:\""
-    tail = "\",thread_id :"
-    start = html.find(head)
-    end = html.find(tail,start)
-    postAuthor = html[start+len(head):end]
-    #寻找回帖
-    start = html.find(head)
-    end = html.find(tail,start)
-    rawreply = html[start+len(head):end]
-    html = html[end+len(tail):]
-    rawreply = onlyCHS(rawreply)
-    #寻找时间
-    head = "&quot;date&quot;:&quot;"
-    tail = "&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
-    start = html.find(head)
-    end = html.find(tail,start)
-    postDate = html[start+len(head):end]
-    html = html[end+len(tail):]
-
-    replydata = ""
-    #print("NOT IN WHILE:postAuthor=",postAuthor,"\tpostDate=",postDate,"\treply=",reply)
-    replydata = replydata + rawreply + "*#*" + postAuthor + "*#*" + postDate +"$#$"
-    #上面的代码完成了1楼信息的抓取
-    #接下来寻找第一页的回帖内容================================
-    #寻找该页的所有回帖内容
-    head = " j_d_post_content  clearfix\">            "
-    tail = "</div><br></cc><br><div class=\"user-hide-post-down\" style=\"display: none;\"></div>"
-    #寻找发帖用户
-    username_head="<img username=\""
-    username_tail="\" class=\"\" src=\""
-    #寻找发帖时间
-    postdate_head="&quot;date&quot;:&quot;"
-    postdate_tail="&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
-    while True:
-        if html.find(username_tail) < 0:
-            break
-        #寻找作者
-        start = html.find(username_head)
-        end = html.find(username_tail)
-        if end < 0 or start < 0 :
-            break
-        author = html[start+len(username_head):end]
-        html = html[end+len(username_tail):]
-        #print("author=",author,"\tstart=",start,"\tend=",end)
-        #寻找回帖内容
-        start = html.find(head)
-        end = html.find(tail,start)
-        if end < 0 or start < 0 :
-            break
-        rawreply = html[start+len(head):end]
-        print("rawreply DATA:\t","\tstart=",start,"\tend=",end,"\tminus=",end-start)
-        html = html[end+len(tail):]
-        rawreply = onlyCHS(rawreply)
-        #print("reply=",reply)
-        #找到了一个回复，接下来寻找作者和发帖时间
-        #寻找发帖时间
-        start = html.find(postdate_head)
-        end = html.find(postdate_tail)
-        if end < 0 or start < 0 :
-            break
-        date = html[start+len(postdate_head):end]
-        html = html[end+len(postdate_tail):]
-        #print("post date=",date,"\tstart=",start,"\tend=",end)
-        
-        #os.system("pause")
-        replydata = replydata + reply + "*#*" + author + "*#*" + date +"$#$"
-    #返回结果
-    return postAuthor , postDate , replydata
-"""
-
-#该函数用来去掉回帖中无关HTML标签，只保留中文/英文
-#返回值：无HTML标签的回帖数据，如果出错，返回空字符串
-"""该函数存在问题，故注释掉，在以后的更新中，该函数可能会消失，该函数目前已用cleanhtml代替
-def onlyCHS(reply):
-    #回复里面的多于图片标签
-    ex_img_head = "<img"
-    ex_img_tail = ">"
-    ex_div_head = "<div"
-    ex_div_tail = ">"
-    ex_a_head = "<a href="
-    ex_a_tail = "</a>"
-    ex_span_head = "<span"
-    ex_span_tail = "</span>"
-    ex_embed_head = "<embed"
-    ex_embed_tail = ">"
-    #去掉贴吧表情之类的内嵌HTML标签
-    imgstart = reply.find(ex_img_head)
-    reply = reply.replace("<br>","")
-    #清除img
-    while True:
-        rplen = len(reply)
-        #print("imgstart=",imgstart,"\tlen(reply)=",len(reply))
-        #os.system("pause")
-        if imgstart < 0 or reply.find(ex_img_tail) < 0:
-            break
-        lastreply = reply
-        reply = reply[:imgstart] + reply[reply.find(ex_img_tail,imgstart)+len(ex_img_tail):]
-        if len(reply) > rplen:
-            reply = lastreply
-            break
-        imgstart = reply.find(ex_img_head)
-    #清除div
-    divstart = reply.find(ex_div_head)
-    reply = reply.replace("</div>","")
-    while True:
-        #print("divstart=",imgstart,"reply=",reply)
-        #os.system("pause")
-        rplen = len(reply)
-        if divstart < 0 or reply.find(ex_div_tail) < 0:
-            break
-        lastreply = reply
-        reply = reply[:divstart] + reply[reply.find(ex_div_tail,divstart)+len(ex_div_tail):]
-        if len(reply) > rplen:
-            reply = lastreply
-            break
-        divstart = reply.find(ex_div_head)  
-     #清除a
-    astart = reply.find(ex_a_head)
-    while True:
-        rplen = len(reply)
-        if astart < 0 or reply.find(ex_a_tail) < 0:
-            break
-        lastreply = reply
-        reply = reply[:astart] + reply[reply.find(ex_a_tail,astart)+len(ex_a_tail):]
-        if len(reply) > rplen:
-            reply = lastreply
-            break
-        astart = reply.find(ex_a_head)
-    #清除span
-    spanstart = reply.find(ex_span_head)
-    while True:
-        #print("spanstart=",imgstart,"reply=",reply)
-        #os.system("pause")
-        rplen = len(reply)
-        if spanstart < 0 or reply.find(ex_span_tail) < 0:
-            break
-        lastreply = reply
-        reply = reply[:spanstart] + reply[reply.find(ex_span_tail,spanstart)+len(ex_span_tail):]
-        if len(reply) > rplen:
-            reply = lastreply
-            break
-        spanstart = reply.find(ex_span_head)
-    #清除<embed
-    embedstart = reply.find(ex_embed_head)
-    while True:
-        #print("embedstart=",imgstart,"reply=",reply)
-        #os.system("pause")
-        rplen = len(reply)
-        if embedstart < 0 or reply.find(ex_embed_tail) < 0:
-            break
-        lastreply = reply
-        reply = reply[:embedstart] + reply[reply.find(ex_embed_tail,embedstart)+len(ex_embed_tail):]
-        if len(reply) > rplen:
-            reply = lastreply
-            break
-        embedstart = reply.find(ex_embed_head)
-    if reply.find("</div>") > -1:
-        return ""
-    return reply    
-"""
+    return psum , postAuthor , postDate , replydata , nextpage
 
 #下面的函数用来格式化时间字段，避免数据分析模块出错
 def timeFormater(timestr):
@@ -382,7 +231,7 @@ def timeFormater(timestr):
 
 #清除不必要信息
 def clearNonEssential(strd):
-    nonesslist = [">","\""," ",",","\n","\r"]
+    nonesslist = [">","\""," ",",","\n","\r","clearfix"]
     dstr = strd
     for item in nonesslist:
         dstr = dstr.replace(item,"")
@@ -439,7 +288,7 @@ def pocessDataList(GV_COUNT,begURL):
     while NO_OUT: 
         if( len(pocessList) > 0 ) :
             count += 1
-            print('>>>>>当前正在处理第【',count,'】页数据,已抓取',titlesum,'条数据.....',end=' ')
+            print('>>>>>当前正在处理第【',count,'】页的帖子,已抓取',titlesum,'条数据.....',end=' ')
             m , dstr= getTitle(pocessList[0].decode('utf-8','ignore'))
             del pocessList[0]
             titlelist += dstr
@@ -465,7 +314,10 @@ def pocessDataList(GV_COUNT,begURL):
     return titlesum,titlelist
 
 
-#该函数用来处理每一条帖子的第一页信息
-def dispatchPocessSuburl():
+#以下2个函数的目地是为了减少程序的内存占用。
+#该函数用来从文件中读取已经下载的HTML数据，然后在将其清空。
+def readSavedHTML():
     pass
-
+#该函数用于将下载的HTML数据写入文件
+def saveToFile():
+    pass
