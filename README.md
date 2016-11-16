@@ -49,16 +49,18 @@ Visual Studio 2015
 
 显示某个词语的词频-时间图（wordstimeline）
 
-![](X:/Projects-X/Tieba-zhuaqu/README/figure_3-1.png)
 
 ####分析特定用户####
+
+![](https://github.com/ankanch/tieba-zhuaqu/raw/master/README/figure_3-1.png)
+
 分析某位用户的贴吧活跃度（userX）
 
-![](X:/Projects-X/Tieba-zhuaqu/README/figure_3-2.png)
+![](https://github.com/ankanch/tieba-zhuaqu/raw/master/README/figure_3-2.png)
 
 分析某位用户的高频关键字（userX）
 
-![](X:/Projects-X/Tieba-zhuaqu/README/figure_3-3.png)
+![](https://github.com/ankanch/tieba-zhuaqu/raw/master/README/figure_3-3.png)
 
 分析某位用户的贴吧活跃时间段（userX：通过叠加每日活跃时间段）
 
