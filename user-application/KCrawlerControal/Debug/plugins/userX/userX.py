@@ -47,7 +47,7 @@ def showLastDays(authorname,days):
         spostdate = getPostDatebyTimeDomain(begdate,enddate,RFF.getPostDataList())
     else:
         spostdate = getPostDatebyTimeDomain(begdate,enddate,RFF.getPostDataList())
-    spostdate = RFF.getPostByAuthor(authorname,spostdate)
+    spostdate = getPostByAuthor(authorname,spostdate)
     llen = len(spostdate)
     #开始统计词频
     feqlist = []
@@ -107,7 +107,7 @@ def getTimeDomain(datelist):
     return datelist[0],datelist[len(datelist)-1]
     
 #该函数用来显示指定用户的关键词
-def showKeyWord(authorname,days,datalist=RFF.getPostDataList()):
+def showKeyWord(authorname,days):
     begdate,enddate = getTimeDomain(RFF.getDateList())
     spostdate = []
     if days > 0:
@@ -121,6 +121,93 @@ def showKeyWord(authorname,days,datalist=RFF.getPostDataList()):
     #合并回帖
     for post in spostdate:
         dp += "。" + post[0]
-    kd = jieba.analyse.extract_tags(dp, topK=20)
-    print("\n\n贴吧ID：",authorname,":\n总共回帖长度（基于已有数据）:",len(dp),"\n关键词：\n",str(kd))
+    kd = jieba.analyse.extract_tags(dp, topK=10,allowPOS=( 'n', 'v'))
+    print("\n\n贴吧ID：",authorname,":\n总计回帖长度（基于已有数据）:",len(dp),"\n关键词：\n")
+    feqlist = []
+    sumfeq = 0
+    for keyword in kd:
+        print(keyword,end="\t")
+        feqlist.append(0)
+    print("\n\n")
+    #显示条形图
+    #统计词频
+    ttt = 0
+    for keyword in kd:
+        feqlist[ttt] = dp.count(keyword)
+        sumfeq+=feqlist[ttt]
+        ttt+=1
+    print(str(feqlist))
+    drawGraphic.barHonGraphics("关键字","出现次数",kd,feqlist,"用户【"+authorname+"】的关键字")
 
+#该函数用于按时间排序spostdate
+def sortandget(spostdata):
+    x = 0
+    #[[内容,作者,时间],[...],...]
+    for post in spostdata:
+        pd = datetime.datetime.strptime(post[2], "%Y-%m-%d %H:%M")
+        spostdata[x][2] = pd
+        x+=1
+    return sorted(spostdata,key=lambda x:x[2],reverse=True)
+
+#该函数用于将sortandget中的数据按天以每小时分别归类
+def gatherbyDays(sortandgetdata):
+    days = [] # [  [date,[ countlist ]    ],    ]
+    #建立索引
+    for post in sortandgetdata:
+        if len(days) != 0:
+            NO_FOUND = True
+            for ddata in days:
+                if ddata[0].year == post[2].year and ddata[0].month == post[2].month and ddata[0].day == post[2].day:
+                    NO_FOUND = False
+                    break
+            if NO_FOUND == True:
+                days.append([post[2],[]])
+        else:
+            days.append([post[2],[]])
+    #开始统计
+    x = 0
+    for ddata in days:
+        for post in sortandgetdata:
+            if ddata[0].year==post[2].year and ddata[0].month==post[2].month and ddata[0].day == post[2].day:
+                timed = post[2].time()
+                days[x][1].append(timed)
+        x+=1
+    return days
+
+#该函数用于分析用户的活跃时间段
+def activeTimeAnaylize(authorname,days):
+    begdate,enddate = getTimeDomain(RFF.getDateList())
+    spostdate = []
+    if days > 0:
+        begdate = enddate - datetime.timedelta(days=days)
+        spostdate = getPostDatebyTimeDomain(begdate,enddate,RFF.getPostDataList())
+    else:
+        spostdate = getPostDatebyTimeDomain(begdate,enddate,RFF.getPostDataList())
+    spostdate = getPostByAuthor(authorname,spostdate) #[[内容,时间],[...],...]
+    tpostdata = sortandget(spostdate)
+    tpostdata = gatherbyDays(tpostdata) # [  [date,[ countlist ]    ],    ]
+    #for post in tpostdata:
+    #    print(str(post))
+    #开始分析活跃时间段
+    #每天的情况都分析一次，然后叠加求均值
+    # [  [date,[ countlist ]    ],    ]
+    xvalue = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+    FEQLIST = []
+    for post in tpostdata:
+        feqlist = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        for time in post[1]:
+            hour = time.hour
+            feqlist[hour]+=1
+        FEQLIST.append(feqlist)
+        print(str(feqlist))
+    #平均下
+    avgfeq = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    hour = 0
+    for x in avgfeq:
+        sum = 0
+        for hoursum in FEQLIST:
+            sum+=hoursum[hour]
+        avgfeq[hour] = sum
+        hour+=1
+    print("after add up all :\n\n",str(avgfeq))
+    drawGraphic.linePlotGraphics('时间（小时）','发帖次数',xvalue,avgfeq,"【"+ authorname +'】的活跃时间段图(共 '+ str(len(FEQLIST)) +" 天数据)")
