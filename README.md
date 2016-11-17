@@ -31,7 +31,7 @@ Visual Studio 2015
 
 ##数据分析模块##
 
-**测试数据下载地址：[http://pan.cuit.edu.cn/share/7FF9yiO5](http://pan.cuit.edu.cn/share/7FF9yiO5) （提取码：Yp32）
+**测试数据下载地址：[http://pan.cuit.edu.cn/share/7FF9yiO5](http://pan.cuit.edu.cn/share/F8qiYiIC) （提取码：cm8p）
 
 ###数据分析示例###
 

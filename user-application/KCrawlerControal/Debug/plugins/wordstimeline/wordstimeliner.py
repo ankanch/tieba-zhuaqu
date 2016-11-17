@@ -62,6 +62,7 @@ def getPostDatebyTimeDomain(begdate,enddate,datalist):
         if titledate < enddate and titledate > begdate:
             satisfied.append(post[0])
         replylist = post[1]
+        del datalist[0]
         for reply in replylist:
             if len(reply) < 3:
                 continue
@@ -73,9 +74,18 @@ def getPostDatebyTimeDomain(begdate,enddate,datalist):
 
 #该函数用来显示过去指定天数的词频变化
 def showLastDays(word,days):
-    begdate,enddate = getTimeDomain(RFF.getDateList())
+    print("加载任务结果文件...")
+    buf = RFF.openResult()
+    datebuf = RFF.getDateList(buf)
+    begdate,enddate = getTimeDomain(datebuf)
+    del datebuf
+    print("计算时间区间...")
     begdate = enddate - datetime.timedelta(days=days)
-    spostdate = getPostDatebyTimeDomain(begdate,enddate,RFF.getPostDataList())
+    print("解析回帖数据...")
+    buf = RFF.getPostDataList(buf)
+    spostdate = getPostDatebyTimeDomain(begdate,enddate,buf)
+    del buf
+    print("开始统计.")
     #开始统计词频
     feqlist = []
     timeline = []
@@ -116,9 +126,18 @@ def showLastDays(word,days):
 
 #该函数用来显示过去指定月数的词频变化
 def showLastMonths(word,months):
-    begdate,enddate = getTimeDomain(RFF.getDateList())
+    print("加载任务结果文件...")
+    buf = RFF.openResult()
+    datebuf = RFF.getDateList(buf)
+    begdate,enddate = getTimeDomain(datebuf)
+    del datebuf
+    print("计算时间区间...")
     begdate = enddate - datetime.timedelta(days=months*30)
-    spostdate = getPostDatebyTimeDomain(begdate,enddate,RFF.getPostDataList())
+    print("解析回帖数据...")
+    buf = RFF.getPostDataList(buf)
+    spostdate = getPostDatebyTimeDomain(begdate,enddate,buf)
+    del buf
+    print("开始统计.")
     #开始统计词频
     feqlist = []
     timeline = []
@@ -154,9 +173,18 @@ def showLastMonths(word,months):
 
 #该函数用来显示过去指定年的词频变化
 def showLastYears(word,years):
-    begdate,enddate = getTimeDomain(RFF.getDateList())
+    print("加载任务结果文件...")
+    buf = RFF.openResult()
+    datebuf = RFF.getDateList(buf)
+    begdate,enddate = getTimeDomain(datebuf)
+    del datebuf
+    print("计算时间区间...")
     begdate = enddate - datetime.timedelta(days=years*365)
-    spostdate = getPostDatebyTimeDomain(begdate,enddate,RFF.getPostDataList())
+    print("解析回帖数据...")
+    buf = RFF.getPostDataList(buf)
+    spostdate = getPostDatebyTimeDomain(begdate,enddate,buf)
+    del buf
+    print("开始统计.")
     #开始统计词频
     feqlist = []
     timeline = []
