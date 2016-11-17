@@ -48,6 +48,7 @@ def getContentList(rawdata):
         replylist = post[1]
         for reply in replylist:
             contentlist.append(reply[0])
+    del postdata
     return contentlist
 
 #该函数的作用是返回所有发帖日期的集合
@@ -82,6 +83,7 @@ def getAuthorList():
         replylist = post[1]
         for reply in replylist:
             authorlist.append(reply[1])
+    del postdata
     return authorlist
 
 #该函数用于统计各个词语的出现次数
