@@ -5,6 +5,13 @@
 目前该系统内部自带了4个插件用于数据分析，你可以给它贡献更多插件（插件由Python编写）
 
 该爬虫系统主要由3部分组成：TaskManager任务管理服务器，KCrawlerManager用户端管理软件（KCrawlerController），Cralwer爬虫程序
+###在你继续往下读之前：###
+如果你只是简单的想使用这个软件爬取信息并加以分析，你需要下载以下文件：
+
+    tieba-zhuaqu：贴吧抓取主程序（请运行RunTest.bat）
+    KCrawlerControal:需要使用这个软件里面的数据分析模块
+
+在开始之前请确认你已经安装python3.5以及后面提到的第三方库。
 ##语言及环境##
 
 Python3.5.1
