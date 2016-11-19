@@ -13,9 +13,10 @@ PATH_RESULT_FILE =  PATH_SUFFIX + "\\result.txt"
 #该函数返回帖子列表，进行第一步分离，用于分离帖子基本信息和回帖信息
 #返回格式：2个元素的list v 
 # [ [[帖子标题,作者,发帖时间] , [回帖列表：[回帖内容,作者,回帖时间],[回帖内容,作者,回帖时间],[[......]],.....]] ]
-def getPostDataList():
-    rawresult = openResult()
+def getPostDataList(rawresult):
+    #rawresult = openResult()
     rawpost = spiltRawPost(rawresult)
+    del rawresult
     SPILT_TITLE_PDATA = "@#@"
     SPILT_INNER_DATA = "*#*"
     SPILT_INNER_REPLY = "$#$"
@@ -38,8 +39,8 @@ def getPostDataList():
 
 #该函数的作用是返回贴吧标题与回帖列表
 #返回格式：类型为字符串的list
-def getContentList():
-    postdata = getPostDataList()
+def getContentList(rawdata):
+    postdata = getPostDataList(rawdata)
     contentlist = []
     # [ [[帖子标题,作者,发帖时间] , [回帖列表：[回帖内容,作者,回帖时间],[回帖内容,作者,回帖时间],[[......]],.....]] ]
     for post in postdata:
@@ -47,13 +48,14 @@ def getContentList():
         replylist = post[1]
         for reply in replylist:
             contentlist.append(reply[0])
+    del postdata
     return contentlist
 
 #该函数的作用是返回所有发帖日期的集合
 #返回格式：被分割的时间list 
 # [[年,月,日,小时,分钟],[.....],.....] (int)
-def getDateList():
-    postdata = getPostDataList()
+def getDateList(rawdata):
+    postdata = getPostDataList(rawdata)
     datelist = []
     # [ [[帖子标题,作者,发帖时间] , [回帖列表：[回帖内容,作者,回帖时间],[回帖内容,作者,回帖时间],[[......]],.....]] ]
     for post in postdata:
@@ -62,7 +64,11 @@ def getDateList():
         for reply in replylist:
             if len(reply) < 3:
                 continue
-            datelist.append(datetime.datetime.strptime(reply[2], "%Y-%m-%d %H:%M"))
+            try:
+                datelist.append(datetime.datetime.strptime(reply[2], "%Y-%m-%d %H:%M"))
+            except Exception as e:
+                print("x",end="")
+    del postdata
     return datelist
 
 
@@ -77,6 +83,7 @@ def getAuthorList():
         replylist = post[1]
         for reply in replylist:
             authorlist.append(reply[1])
+    del postdata
     return authorlist
 
 #该函数用于统计各个词语的出现次数
@@ -107,7 +114,7 @@ def satisticWord(word,datalist):
 #打开抓取结果文件
 #函数返回：文件内容
 def openResult():
-    print("任务结果文件：",PATH_RESULT_FILE)
+    print("加载任务结果文件：",PATH_RESULT_FILE)
     f = open(PATH_RESULT_FILE,'rb')
     data = f.read()
     f.close()
@@ -119,8 +126,3 @@ def openResult():
 def spiltRawPost(rawdata):
     datalist = rawdata.split('\r\n\t\t')
     return datalist
-
-
-#postdata = getPostDataList()
-#print("len(postdata)=",len(postdata),"\tlen(postdata[0])=",len(postdata[0]),"\tlen(postdata[1])=",len(postdata[1]))
-#print(str(postdata))

@@ -2,7 +2,7 @@ from tkinter import *           # 导入 Tkinter 库
 import multiwords
 root = Tk()                  
 root.resizable(False,False)
-root.title("统计多个词语")
+root.title("统计对比多个词语")
 
 #KCC基本分析组件
 #该组件用于列举出包含指定词语的帖子/回帖
