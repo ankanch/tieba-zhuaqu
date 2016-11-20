@@ -12,7 +12,6 @@ import datetime
 #该脚本用来抓取我们贴吧帖子的标题
 begURL = 'http://tieba.baidu.com/f?'
 #主程序逻辑
-TT.setupfiles()
 os.system('cls')
 print('>>>>>该脚本用来抓取贴吧帖子的标题，可以用作舆情分析\n>>>>>by Kanch kanchisme@gmail.com')
 isize = os.path.getsize('C:\\ktieba\\result.txt')
@@ -46,6 +45,8 @@ mstr = "============================================================\r\n抓取�
 #我们用一个线程下载网页，一个线程处理下载后的数据。
 #======================================================================================
 time1 = time.time()
+TT.GV_FINISHED_COUNT.append(0)
+TT.GV_TIEBANAME = tieba_name
 #下面是多线程方案
 MAX_PAGE = int(TT.max_page)
 #创建线程
@@ -67,13 +68,12 @@ for item in t:
     item.setDaemon(True)
     item.start()
 #循环处理数据
-sum,mstr = TT.pocessDataList(TT.GV_THEAD_COUNT,begURL)
+sum,mstr = TT.pocessDataList(TT.GV_THEAD_COUNT,begURL,tieba_name)
 #===================================全部处理完毕，储存至文件======================================
 now = datetime.datetime.now()
 now.strftime('%Y-%m-%d %H:%M:%S')  
 last_data_source = {'sum':sum,'time':now}
 
-TT.savetofile(mstr,'C:\\ktieba\\result.txt')
 f = open('C:\\ktieba\\result_add','wb')
 pickle.dump(last_data_source, f,2)
 f.close()

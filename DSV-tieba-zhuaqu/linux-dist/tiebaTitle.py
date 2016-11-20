@@ -1,34 +1,29 @@
-#coding=utf-8
+ #coding=utf-8
 import urllib.request
 import threading
 import re
 import os
 import sys
 import socket
+import _database_ as DB
+import pymysql
 
 socket.setdefaulttimeout(60)
 GV_DOWNLOAD_ALL = []
 GV_THEAD_COUNT = 4   #并发下载线程数
 GV_FINISHED_COUNT = []
 GV_POCESSSUM = []
+GV_TIEBANAME = ""
 page = 0
 x=0
 max_page = 0
-#pocessList=[]  #用来存放下载的HTML，但为了减少内存占用，现在已经改为存放在文件里面。
+DBCONN = pymysql.connect(host=DB.DBL_CONNECTION_HOST, port=3306,user=DB.DBL_CONNECTION_USER,passwd=DB.DBL_CONNECTION_PASSWORLD,db=DB.DBL_CONNECTION_DATABASE_NAME,charset='UTF8')
+DBCONN.set_charset('utf8mb4')
+DBCUR = DBCONN.cursor()
+print("数据库初始化完毕")
+
 
 GV_ERROR_THREAD_DATA = []   #该变量用来储存出错线程数据，包括线程编号，当前线程下载位置，线程目标下载位置（里面储存的是list，按照该顺序排列）
-
-#该函数用来建立一些必要的缓存文件（仅适用于windows）
-def setupfiles():
-    if os.path.exists('C:\\ktieba') == False:
-        os.makedirs( "C:\\ktieba" )
-    if os.path.exists('C:\\ktieba\\result.txt') == False:
-        f = open('C:\\ktieba\\result.txt','w')
-    if os.path.exists('C:\\ktieba\\result_add') == False:
-        f = open('C:\\ktieba\\result_add','w')
-    if os.path.exists('C:\\ktieba\\ignoreWords') == False:
-        f = open('C:\\ktieba\\ignoreWords','w')
-    GV_FINISHED_COUNT.append(0)
 
 #该函数用来下载网页，如果出错会一直循环下载
 #返回值：网页源代码
@@ -67,17 +62,14 @@ def getTitle(html):
         #匹配帖子地址,用来获得作者和发帖时间
         postUrl = re.sub("<a href=\"","",dta)
         postUrl = re.sub("\" title=.*?class=\"j_th_tit \">.*?</a>","",postUrl)
+        fatherurl = postUrl
+        author = ""
         while nextpage != "NULL": #抓取一个帖子的所有页面
-            #print("postURL=",postUrl)
-            psum , author , date , replydata , nextpage= getFirstPage(postUrl)
+            psum , author , nextpage= getPostPages(postUrl,fatherurl,author)
             postUrl = nextpage
             if firstfloor == True:
-                dstr = dstr + '\r\n\t\t' + k + "*#*" + author + "*#*" + date + "@#@" + replydata
                 firstfloor = False
-            else:
-                dstr = dstr + replydata
             t+=psum
-        #dstr = dstr + '\r\n\t\t' + k + "*#*" + author + "*#*" + date + "@#@" + replydata
         t += 1
     print("\n")
     GV_FINISHED_COUNT[0] += 1
@@ -85,7 +77,7 @@ def getTitle(html):
 
 #得到帖子的第一页所有回帖，作者以及回帖时间
 #返回值：作者，发帖时间，回复数据
-def getFirstPage(suburl):
+def getPostPages(suburl,fatherurl,postauthor):
     html = getHtml('http://tieba.baidu.com' + suburl)
     html = html.decode('utf-8','ignore')
     #首先寻找是否有下一页
@@ -97,45 +89,50 @@ def getFirstPage(suburl):
         nextpage = "NULL"
     #print("nextpage_pos=",nextpage_pos,nextpage)
     #os.system("pause")
-    #寻找用户名
-    head = "author:"
-    tail = "thread_id"
-    start = html.find(head)
-    end = html.find(tail,start)
-    postAuthor = html[start+len(head):end]
-    postAuthor = cleanhtml(postAuthor)
-    postAuthor = clearNonEssential(postAuthor)
-    #寻找回帖
-    head = " j_d_post_content"
-    tail = "<div class=\"user-hide-post-down\" style=\"display: none;\">"
-    start = html.find(head)
-    end = html.find(tail,start)
-    reply = html[start+len(head):end]
-    html = html[end+len(tail):]
-    reply = cleanhtml(reply)
-    reply = clearNonEssential(reply)
-    #寻找时间
-    head = "&quot;date&quot;:&quot;"
-    tail = "&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
-    postdate_head_typeB = "楼</span><span class=\"tail-info\">"
-    postdate_tail_typeB = "</span></div><ul class=\"p_props_tail props_appraise_wrap\">"
-    start = html.find(head)
-    end = html.find(tail,start)
     postDate = ""
-    if end < 0 or start < 0 :
-        #在寻找时间的时候没有找到，说明采用了typeB
-        start = html.find(postdate_head_typeB)
-        end = html.find(postdate_tail_typeB)
-        if end < 0 or start < 0 :
-            print("NMT-ERRORS",end="")
-            postDate = "1996-10-30 22:58"
-        date = html[start+len(postdate_head_typeB):end]
-        html = html[end+len(postdate_tail_typeB):]
-    else:
-        postDate = html[start+len(head):end]
+    postAuthor = ""
+    reply = ""
+    if postauthor == "":
+        #寻找用户名
+        head = "author:"
+        tail = "thread_id"
+        start = html.find(head)
+        end = html.find(tail,start)
+        postAuthor = html[start+len(head):end]
+        postAuthor = cleanhtml(postAuthor)
+        postAuthor = clearNonEssential(postAuthor)
+        #寻找回帖
+        head = " j_d_post_content"
+        tail = "<div class=\"user-hide-post-down\" style=\"display: none;\">"
+        start = html.find(head)
+        end = html.find(tail,start)
+        reply = html[start+len(head):end]
         html = html[end+len(tail):]
-    postDate = cleanhtml(postDate)
-    postDate = timeFormater(postDate)
+        reply = cleanhtml(reply)
+        reply = clearNonEssential(reply)
+        #寻找时间
+        head = "&quot;date&quot;:&quot;"
+        tail = "&quot;,&quot;vote_crypt&quot;:&quot;&quot;,&quot;post_no&quot;"
+        postdate_head_typeB = "楼</span><span class=\"tail-info\">"
+        postdate_tail_typeB = "</span></div><ul class=\"p_props_tail props_appraise_wrap\">"
+        start = html.find(head)
+        end = html.find(tail,start)
+        postDate = ""
+        if end < 0 or start < 0 :
+            #在寻找时间的时候没有找到，说明采用了typeB
+            start = html.find(postdate_head_typeB)
+            end = html.find(postdate_tail_typeB)
+            if end < 0 or start < 0 :
+                print("NMT-ERRORS",end="")
+                postDate = "1996-10-30 22:58"
+            date = html[start+len(postdate_head_typeB):end]
+            html = html[end+len(postdate_tail_typeB):]
+        else:
+            postDate = html[start+len(head):end]
+            html = html[end+len(tail):]
+        postDate = cleanhtml(postDate)
+        postDate = timeFormater(postDate)
+        postauthor = postAuthor
     replydata = ""
     #print("NOT IN WHILE:postAuthor=",postAuthor,"\tpostDate=",postDate,"\treply=",reply)
     #replydata = replydata + reply + "*#*" + postAuthor + "*#*" + postDate +"$#$"
@@ -211,20 +208,19 @@ def getFirstPage(suburl):
             postDate = date
             first = False
         #os.system("pause")
-        psum+=1
-        replydata = replydata + reply + "*#*" + author + "*#*" + date +"$#$"       
+        psum+=1   
+        reply = reply.replace("\"","")
+        DB_Insert(fatherurl,GV_TIEBANAME,author,reply,date,postauthor,suburl)  
     #返回结果
-    return psum , postAuthor , postDate , replydata , nextpage
+    return psum , postAuthor  , nextpage
 
 #下面的函数用来格式化时间字段，避免数据分析模块出错
 def timeFormater(timestr):
     ss = timestr.replace(" ","")
     if len(timestr) < 8:
         ss = "1996-10-30 22:58"
-        #print("tbefore=",timestr,"\ttafter=",ss)
     elif timestr[10] != " ":
         ss = timestr[:9] + " " + timestr[10:]
-        #print("tbefore=",timestr,"\ttafter=",ss)
     else:
         ss = timestr
     return ss
@@ -243,11 +239,7 @@ def cleanhtml(reply):
   onlytext = re.sub(cleanr, '', reply)
   return onlytext
 
-#该函数用来将最终数据保存到文件里面
-def savetofile(data,path):
-    f = open(path,'wb')
-    f.write(data.encode('gb18030'))
-    f.close()
+
 
 #该函数用来下载网页，为【入口函数】，以上所有函数均由该函数直接/间接调用
 def downloadPage(psum,count,begURL,beg=0):
@@ -277,7 +269,7 @@ def downloadPage(psum,count,begURL,beg=0):
 
 
 #该函数用来处理网页的HTML信息，为【第二入口】函数，控制线程的结束与终止
-def pocessDataList(GV_COUNT,begURL):
+def pocessDataList(GV_COUNT,begURL,tieba_name):
     titlesum = 0
     titlelist = ''
     count = 0
@@ -286,14 +278,13 @@ def pocessDataList(GV_COUNT,begURL):
     x = 0
     NO_OUT = True
     exit_sum = 0
+    GV_TIEBANAME = tieba_name
+    #DB_Init()
     while NO_OUT: 
         htmldata = readSavedHTML()
-        #if( len(pocessList) > 0 ) :
         if( htmldata != "ERROR" ) :
             count += 1
             print('>>>>>当前正在处理第【',count,'】页的帖子,已抓取',titlesum,'条数据.....',end=' ')
-            #m , dstr= getTitle(pocessList[0].decode('utf-8','ignore'))
-            #del pocessList[0]
             m , dstr= getTitle(htmldata.decode('utf-8','ignore'))
             titlelist += dstr
             titlesum += m
@@ -302,7 +293,6 @@ def pocessDataList(GV_COUNT,begURL):
                 if item == True:
                     x += 1
             print('下载完毕！','调试：x=',x,'GV_COUNT=',GV_COUNT)
-        #if GV_FINISHED_COUNT[0] == GV_COUNT:
         if GV_FINISHED_COUNT[0] == GV_POCESSSUM[0]:
             NO_OUT = False
             break
@@ -315,6 +305,7 @@ def pocessDataList(GV_COUNT,begURL):
                 tn.setDaemon(True)
                 tn.start()
                 del GV_ERROR_THREAD_DATA[0]
+    DB_clear()
     return titlesum,titlelist
 
 
@@ -337,3 +328,38 @@ def saveToFile(htmldata,threadcount,fnum):
     f = open(filename,"wb")
     f.write(htmldata)
     f.close()
+
+
+
+#该函数用于将数据插入数据库
+def DB_Insert(POSTOF,TIEBANAME,AUTHOR,CONTENT,DATE,REPLYTO,LINK):
+    INS = "INSERT INTO `postdata`(`POSTOF`, `TIEBANAME`, `AUTHOR`, `CONTENT`, `DATE`, `REPLYTO`, `LINK`) VALUES ("
+    INS+= "\"" + POSTOF + "\",\"" + TIEBANAME +"\",\"" + AUTHOR + "\",\"" + CONTENT +"\",\"" + DATE +"\",\""+ REPLYTO + "\",\"" + LINK + "\")"
+    #print(INS)
+    try:
+        DBCUR.execute("SET names 'utf8mb4'")
+        DBCUR.execute(INS)
+        DBCONN.commit()
+    except Exception as e:
+        print("SQL-SYNTAX-ERROR",end="")
+        return False 
+    return True
+
+#该函数用与从数据库中查询
+def DB_SELECT():
+    INS = "select  NAME from `tr_teacherlist`    where NAME like('%" + word +"%')"
+    pass
+
+#该函数用于检查当前数据是否存在于数据库中
+def DB_UniqueCheck(postContent,author,date):
+    SEL = "select  AUTHOR,DATE from `postdata`    where CONTENT0=\"" + postContent + "\""
+    print("查重....")
+    DBCUR.execute(SEL)
+    DBCONN.commit()
+    data = DBCUR.fetchall()
+    if(data[0][0] == author and date == data[0][1]):
+        return False
+    return True
+
+def DB_clear():
+    DBCONN.close()

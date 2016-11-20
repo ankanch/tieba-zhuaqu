@@ -37,6 +37,8 @@ createdtime.strftime('%Y-%m-%d %H:%M:%S')
 #我们用一个线程下载网页，一个线程处理下载后的数据。
 #======================================================================================
 time1 = time.time()
+TT.GV_FINISHED_COUNT.append(0)
+TT.GV_TIEBANAME = tieba_name
 #下面是多线程方案
 MAX_PAGE = int(TT.max_page)
 #创建线程
@@ -64,7 +66,6 @@ now = datetime.datetime.now()
 now.strftime('%Y-%m-%d %H:%M:%S')  
 last_data_source = {'sum':sum,'time':now}
 
-TT.savetofile(mstr,'C:\\ktieba\\result.txt')
 f = open('C:\\ktieba\\result_add','wb')
 pickle.dump(last_data_source, f,2)
 f.close()
