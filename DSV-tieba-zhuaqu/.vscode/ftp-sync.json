@@ -1,0 +1,16 @@
+{
+    "remotePath": "./pyprojects/tieba-zhuaqu/",
+    "host": "216.45.55.153",
+    "username": "root",
+    "password": "james1996",
+    "port": 21,
+    "protocol": "sftp",
+    "uploadOnSave": false,
+    "passive": false,
+    "debug": false,
+    "privateKeyPath": null,
+    "ignore": [
+        "\\.vscode",
+        "\\.git"
+    ]
+}
