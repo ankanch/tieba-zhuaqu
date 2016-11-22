@@ -9,57 +9,21 @@ import os
 #KCC基本分析组件
 #该组件用于统计某个词语的频率变化并以折线统计图的形式显示
 
-#该函数用来返回指定日期的区间的主题帖/回帖数据（用于被显示过去天/月/年的函数调用）
-#参数说明： begdate:指定开始日期，enddate:指定结束日期
-#返回值：post数据的 list
-#       [ [内容,作者,时间],[......],...... ]
-def getPostDatebyTimeDomain(begdate,enddate,datalist):
-    satisfied = []
-    # [ [[帖子标题,作者,发帖时间] , [回帖列表：[回帖内容,作者,回帖时间],[回帖内容,作者,回帖时间],[[......]],.....]] ]
-    for post in datalist:
-        titledate = datetime.datetime.strptime(post[0][2], "%Y-%m-%d %H:%M")
-        if titledate < enddate and titledate > begdate:
-            satisfied.append(post[0])
-        replylist = post[1]
-        del datalist[0]
-        for reply in replylist:
-            if len(reply) < 3:
-                continue
-            replydate = datetime.datetime.strptime(reply[2], "%Y-%m-%d %H:%M")
-            if replydate > begdate and replydate < enddate:
-                satisfied.append(reply)
-    return satisfied
-
-#该函数用于找出指定用户的回帖数据 *仅用于处理二级数据
-#返回值：post数据 [[内容,时间],[...],...]
-def getPostByAuthor(authorname,datalist):
-    postData = []
-    for post in datalist:
-        if post[1] == authorname:
-            postData.append(post)
-    return postData
-
 #该函数用来显示指定用户的活跃程度图
 def showLastDays(authorname,days):
-    print("加载任务结果文件...")
-    buf = RFF.openResult()
-    datebuf = RFF.getDateList(buf)
-    begdate,enddate = getTimeDomain(datebuf)
-    del datebuf
-    print("计算时间区间...")
-    begdate = enddate - datetime.timedelta(days=days)
-    print("解析回帖数据...")
-    buf = RFF.getPostDataList(buf)
+    print("获取数据集中的最近时间...")
+    enddate = RFF.queryDatasourceLatestTime()
     spostdate = []
+    print("计算时间区间...")
     if days > 0:
         begdate = enddate - datetime.timedelta(days=days)
-        spostdate = getPostDatebyTimeDomain(begdate,enddate,buf)
+        print('时间区间：',begdate,'->',enddate)
     else:
-        spostdate = getPostDatebyTimeDomain(begdate,enddate,buf)
-    del buf
-    print("开始统计.")
-    spostdate = getPostByAuthor(authorname,spostdate)
+        print('时间区间：',begdate,'->',enddate)
+    print("获取回帖列表...")
+    spostdate = RFF.queryContainListAfterTime(authorname,str(begdate))
     llen = len(spostdate)
+    print("开始统计.")
     #开始统计词频
     feqlist = []
     timeline = []
@@ -103,34 +67,26 @@ def getCountByDate(date,datalist):
     ct = 0
     for post in datalist:
         #[[内容,时间],[...],...]
-        ddate = datetime.datetime.strptime(post[2], "%Y-%m-%d %H:%M")
+        ddate = post[4]
         if datedate.year == ddate.year and datedate.month == ddate.month and datedate.day == ddate.day:
             ct+=1
     return ct
-
-
-
-#该函数为辅助函数，用于找出时间区间
-#返回值：最早时间，最近时间
-def getTimeDomain(datelist):
-    datelist.sort()
-    return datelist[0],datelist[len(datelist)-1]
     
 #该函数用来显示指定用户的关键词
 def showKeyWord(authorname,days):
-    buf = RFF.openResult()
-    datebuf = RFF.getDateList(buf)
-    begdate,enddate = getTimeDomain(datebuf)
-    del datebuf
+    print("获取数据集中的最近时间...")
+    enddate = RFF.queryDatasourceLatestTime()
     spostdate = []
-    buf = RFF.getPostDataList(buf)
+    print("计算时间区间...")
     if days > 0:
         begdate = enddate - datetime.timedelta(days=days)
-        spostdate = getPostDatebyTimeDomain(begdate,enddate,buf)
+        print('时间区间：',begdate,'->',enddate)
     else:
-        spostdate = getPostDatebyTimeDomain(begdate,enddate,buf)
-    del buf
-    spostdate = getPostByAuthor(authorname,spostdate)
+        print('时间区间：',begdate,'->',enddate)
+    print("获取回帖列表...")
+    spostdate = RFF.queryContainListAfterTime(authorname,str(begdate))
+    llen = len(spostdate)
+    print("开始统计.")
     dp = ""
     #开始统计关键词
     #合并回帖
@@ -157,13 +113,7 @@ def showKeyWord(authorname,days):
 
 #该函数用于按时间排序spostdate
 def sortandget(spostdata):
-    x = 0
-    #[[内容,作者,时间],[...],...]
-    for post in spostdata:
-        pd = datetime.datetime.strptime(post[2], "%Y-%m-%d %H:%M")
-        spostdata[x][2] = pd
-        x+=1
-    return sorted(spostdata,key=lambda x:x[2],reverse=True)
+    return sorted(spostdata,key=lambda x:x[4],reverse=True)
 
 #该函数用于将sortandget中的数据按天以每小时分别归类
 def gatherbyDays(sortandgetdata):
@@ -173,7 +123,7 @@ def gatherbyDays(sortandgetdata):
         if len(days) != 0:
             NO_FOUND = True
             for ddata in days:
-                if ddata[0].year == post[2].year and ddata[0].month == post[2].month and ddata[0].day == post[2].day:
+                if ddata[0].year == post[4].year and ddata[0].month == post[4].month and ddata[0].day == post[4].day:
                     NO_FOUND = False
                     break
             if NO_FOUND == True:
@@ -184,27 +134,28 @@ def gatherbyDays(sortandgetdata):
     x = 0
     for ddata in days:
         for post in sortandgetdata:
-            if ddata[0].year==post[2].year and ddata[0].month==post[2].month and ddata[0].day == post[2].day:
-                timed = post[2].time()
+            if ddata[0].year==post[4].year and ddata[0].month==post[4].month and ddata[0].day == post[4].day:
+                timed = post[4].time()
                 days[x][1].append(timed)
         x+=1
     return days
 
 #该函数用于分析用户的活跃时间段
 def activeTimeAnaylize(authorname,days):
-    buf = RFF.openResult()
-    datebuf = RFF.getDateList(buf)
-    begdate,enddate = getTimeDomain(datebuf)
-    del datebuf
+    print("获取数据集中的最近时间...")
+    enddate = RFF.queryDatasourceLatestTime()
     spostdate = []
-    buf = RFF.getPostDataList(buf)
+    print("计算时间区间...")
     if days > 0:
         begdate = enddate - datetime.timedelta(days=days)
-        spostdate = getPostDatebyTimeDomain(begdate,enddate,buf)
+        print('时间区间：',begdate,'->',enddate)
     else:
-        spostdate = getPostDatebyTimeDomain(begdate,enddate,buf)
-    del buf
-    spostdate = getPostByAuthor(authorname,spostdate) #[[内容,时间],[...],...]
+        print('时间区间：',begdate,'->',enddate)
+    print("获取回帖列表...")
+    spostdate = RFF.queryContainListAfterTime(authorname,str(begdate))
+    llen = len(spostdate)
+    print("开始统计.")
+    #开始统计词频
     tpostdata = sortandget(spostdate)
     tpostdata = gatherbyDays(tpostdata) # [  [date,[ countlist ]    ],    ]
     #for post in tpostdata:

@@ -20,9 +20,6 @@ DBSETTINGS = {'H':'', #HOST
               'P':'', #PASSWORD
               'D':''} #DATABASE_NAME
 
-DBCONN = None
-DBCUR = None
-
 #该函数用于读取数据源信息
 #返回值：成功true，否则false
 def loadDataSource():
@@ -34,8 +31,11 @@ def loadDataSource():
     dbl = data.split("\r\n")
     for db in dbl:
         DBSETTINGS[db[0]] = db[db.find('=')+1:].replace('\'','').replace(' ','')
-        #print(DBSETTINGS[db[0]])
     return data
+
+loadDataSource()
+DBCONN = pymysql.connect(host=DBSETTINGS['H'], port=3306,user=DBSETTINGS['U'],passwd=DBSETTINGS['P'],db=DBSETTINGS['D'],charset='UTF8')
+DBCUR = DBCONN.cursor()
 
 #该函数用于统计各个词语的出现次数
 #函数返回：一个任意字符串和指定词语的出现次数
@@ -49,8 +49,11 @@ def satisticWord(word):
     MSG.printline2x35(2)
     print('\r\n>>>>>统计结果>----->共【',sum-1,'/',len(mlist),'】条匹配数据，结果如下','\r\n')
     MSG.printline2x35(2)
-    #for item in mlist:
-    #    print('\t◆\t',item)
+    for item in mlist:
+        try:
+            print('\t◆\t',item[0])
+        except Exception as e:
+            print('\t◆\t<<无法编码字符>>')
     MSG.printline2x35(2)
     print('\r\n>>>>>统计结果>----->共【',sum-1,'/',len(mlist),'】条匹配数据，结果如下','\r\n')
     MSG.printline2x35(2)
@@ -62,12 +65,9 @@ def satisticWord(word):
 #从数据库查询包含指定字词的所有数据集
 #返回值：包含指定字词的数据集列表
 def queryWordContainList(word):
-    DBCONN = pymysql.connect(host=DBSETTINGS['H'], port=3306,user=DBSETTINGS['U'],passwd=DBSETTINGS['P'],db=DBSETTINGS['D'],charset='UTF8')
-    DBCUR = DBCONN.cursor()
     SEL = "select  CONTENT from `postdata`    where CONTENT like('%" + word +"%')"
+    DBCUR.execute("SET names 'utf8mb4'")
     DBCUR.execute(SEL)
     DBCONN.commit()
     datalist = DBCUR.fetchall()
     return datalist
-
-loadDataSource()
