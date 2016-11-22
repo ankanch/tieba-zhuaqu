@@ -19,6 +19,7 @@ def showLastDays(authorname,days):
         begdate = enddate - datetime.timedelta(days=days)
         print('时间区间：',begdate,'->',enddate)
     else:
+        begdate = RFF.queryDatasourceEarlyTime()
         print('时间区间：',begdate,'->',enddate)
     print("获取回帖列表...")
     spostdate = RFF.queryContainListAfterTime(authorname,str(begdate))
@@ -73,7 +74,7 @@ def getCountByDate(date,datalist):
     return ct
     
 #该函数用来显示指定用户的关键词
-def showKeyWord(authorname,days):
+def showKeyWord(authorname):
     print("获取回帖列表...")
     spostdate = RFF.queryWordContainListbyAuthor(authorname)
     llen = len(spostdate)
@@ -118,9 +119,9 @@ def gatherbyDays(sortandgetdata):
                     NO_FOUND = False
                     break
             if NO_FOUND == True:
-                days.append([post[2],[]])
+                days.append([post[4],[]])
         else:
-            days.append([post[2],[]])
+            days.append([post[4],[]])
     #开始统计
     x = 0
     for ddata in days:
@@ -141,6 +142,7 @@ def activeTimeAnaylize(authorname,days):
         begdate = enddate - datetime.timedelta(days=days)
         print('时间区间：',begdate,'->',enddate)
     else:
+        begdate = RFF.queryDatasourceEarlyTime()
         print('时间区间：',begdate,'->',enddate)
     print("获取回帖列表...")
     spostdate = RFF.queryContainListAfterTime(authorname,str(begdate))

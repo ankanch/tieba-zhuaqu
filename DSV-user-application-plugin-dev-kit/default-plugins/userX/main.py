@@ -24,7 +24,7 @@ def btnclick():
     elif scaletype == "显示活跃度":
         userX.showLastDays(authorname,int(SCALE))
     elif scaletype == "显示语句关键词":
-        userX.showKeyWord(authorname,int(SCALE))
+        userX.showKeyWord(authorname)
     elif scaletype == "活跃时间段分析":
         userX.activeTimeAnaylize(authorname,int(SCALE))
     else:

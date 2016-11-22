@@ -115,6 +115,16 @@ def queryDatasourceLatestTime():
     datalist = DBCUR.fetchall()
     return datalist[0][0]
 
+#从数据库查询小日期
+#返回值：一个最小日期
+def queryDatasourceEarlyTime():
+    SEL = "select MIN(DATE) from `postdata`"
+    DBCUR.execute("SET names 'utf8mb4'")
+    DBCUR.execute(SEL)
+    DBCONN.commit()
+    datalist = DBCUR.fetchall()
+    return datalist[0][0]
+
 #从数据库查询指定作者的指定日期之间的数据集
 #返回值：指定日期之间的数据集列表
 # [ [主题帖链接,贴吧名,作者,帖子内容,发帖时间,回复给sb,所在页面],[......],..... ]
