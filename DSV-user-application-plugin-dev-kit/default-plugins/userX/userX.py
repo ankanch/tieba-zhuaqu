@@ -74,24 +74,15 @@ def getCountByDate(date,datalist):
     
 #该函数用来显示指定用户的关键词
 def showKeyWord(authorname,days):
-    print("获取数据集中的最近时间...")
-    enddate = RFF.queryDatasourceLatestTime()
-    spostdate = []
-    print("计算时间区间...")
-    if days > 0:
-        begdate = enddate - datetime.timedelta(days=days)
-        print('时间区间：',begdate,'->',enddate)
-    else:
-        print('时间区间：',begdate,'->',enddate)
     print("获取回帖列表...")
-    spostdate = RFF.queryContainListAfterTime(authorname,str(begdate))
+    spostdate = RFF.queryWordContainListbyAuthor(authorname)
     llen = len(spostdate)
     print("开始统计.")
     dp = ""
     #开始统计关键词
     #合并回帖
     for post in spostdate:
-        dp += "。" + post[0]
+        dp += "。" + post[3]
     del spostdate
     kd = jieba.analyse.extract_tags(dp, topK=10,allowPOS=( 'n', 'v'))
     print("\n\n贴吧ID：",authorname,":\n总计回帖长度（基于已有数据）:",len(dp),"\n关键词：\n")
