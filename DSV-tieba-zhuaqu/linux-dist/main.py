@@ -12,7 +12,6 @@ import datetime
 #该脚本用来抓取我们贴吧帖子的标题
 begURL = 'http://tieba.baidu.com/f?'
 #主程序逻辑
-TT.setupfiles()
 os.system('cls')
 print('>>>>>该脚本用来抓取贴吧帖子的标题，可以用作舆情分析\n>>>>>by Kanch kanchisme@gmail.com')
 opt = input('\r\n>>>>>是否要指定抓取的贴吧？如果不指定，将会默认抓取【成都信息工程大学】吧。（Y/N）:____\b\b')
@@ -60,7 +59,7 @@ for item in t:
     item.setDaemon(True)
     item.start()
 #循环处理数据
-sum,mstr = TT.pocessDataList(TT.GV_THEAD_COUNT,begURL)
+sum,mstr = TT.pocessDataList(TT.GV_THEAD_COUNT,begURL,tieba_name)
 #===================================全部处理完毕，储存至文件======================================
 now = datetime.datetime.now()
 now.strftime('%Y-%m-%d %H:%M:%S')  

@@ -20,6 +20,7 @@ max_page = 0
 DBCONN = pymysql.connect(host=DB.DBL_CONNECTION_HOST, port=3306,user=DB.DBL_CONNECTION_USER,passwd=DB.DBL_CONNECTION_PASSWORLD,db=DB.DBL_CONNECTION_DATABASE_NAME,charset='UTF8')
 DBCONN.set_charset('utf8mb4')
 DBCUR = DBCONN.cursor()
+DBCUR.execute("SET names 'utf8mb4'")
 print("数据库初始化完毕")
 
 
@@ -71,6 +72,9 @@ def getTitle(html):
                 firstfloor = False
             t+=psum
         t += 1
+        print("提交数据更新...")
+        DB_COMMIT()
+        print("提交完毕！")
     print("\n")
     GV_FINISHED_COUNT[0] += 1
     return t,dstr
@@ -292,7 +296,7 @@ def pocessDataList(GV_COUNT,begURL,tieba_name):
             for item in GV_DOWNLOAD_ALL:
                 if item == True:
                     x += 1
-            print('下载完毕！','调试：x=',x,'GV_COUNT=',GV_COUNT)
+            #print('下载完毕！','调试：x=',x,'GV_COUNT=',GV_COUNT)
         if GV_FINISHED_COUNT[0] == GV_POCESSSUM[0]:
             NO_OUT = False
             break
@@ -337,13 +341,17 @@ def DB_Insert(POSTOF,TIEBANAME,AUTHOR,CONTENT,DATE,REPLYTO,LINK):
     INS+= "\"" + POSTOF + "\",\"" + TIEBANAME +"\",\"" + AUTHOR + "\",\"" + CONTENT +"\",\"" + DATE +"\",\""+ REPLYTO + "\",\"" + LINK + "\")"
     #print(INS)
     try:
-        DBCUR.execute("SET names 'utf8mb4'")
+        #DBCUR.execute("SET names 'utf8mb4'")
         DBCUR.execute(INS)
-        DBCONN.commit()
+        #DBCONN.commit()
     except Exception as e:
         print("SQL-SYNTAX-ERROR",end="")
         return False 
     return True
+
+#提交数据更新
+def DB_COMMIT():
+    DBCONN.commit()
 
 #该函数用与从数据库中查询
 def DB_SELECT():
@@ -362,4 +370,5 @@ def DB_UniqueCheck(postContent,author,date):
     return True
 
 def DB_clear():
+    DBCUR.close()
     DBCONN.close()
