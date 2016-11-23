@@ -72,9 +72,9 @@ def getTitle(html):
                 firstfloor = False
             t+=psum
         t += 1
-        print("提交数据更新...")
+        print("-",end="")
         DB_COMMIT()
-        print("提交完毕！")
+        print("=",end="")
     print("\n")
     GV_FINISHED_COUNT[0] += 1
     return t,dstr
@@ -127,7 +127,7 @@ def getPostPages(suburl,fatherurl,postauthor):
             start = html.find(postdate_head_typeB)
             end = html.find(postdate_tail_typeB)
             if end < 0 or start < 0 :
-                print("NMT-ERRORS",end="")
+                print("-NMTERR-",end="")
                 postDate = "1996-10-30 22:58"
             date = html[start+len(postdate_head_typeB):end]
             html = html[end+len(postdate_tail_typeB):]
@@ -199,7 +199,7 @@ def getPostPages(suburl,fatherurl,postauthor):
             start = html.find(postdate_head_typeB)
             end = html.find(postdate_tail_typeB)
             if end < 0 or start < 0 :
-                print("no match for time A and B types")
+                print("-NMTERR-")
                 break
             date = html[start+len(postdate_head_typeB):end]
             html = html[end+len(postdate_tail_typeB):]

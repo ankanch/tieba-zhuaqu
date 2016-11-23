@@ -20,6 +20,7 @@ max_page = 0
 DBCONN = pymysql.connect(host=DB.DBL_CONNECTION_HOST, port=3306,user=DB.DBL_CONNECTION_USER,passwd=DB.DBL_CONNECTION_PASSWORLD,db=DB.DBL_CONNECTION_DATABASE_NAME,charset='UTF8')
 DBCONN.set_charset('utf8mb4')
 DBCUR = DBCONN.cursor()
+DBCUR.execute("SET names 'utf8mb4'")
 print("数据库初始化完毕")
 
 
@@ -71,6 +72,9 @@ def getTitle(html):
                 firstfloor = False
             t+=psum
         t += 1
+        print("-",end="")
+        DB_COMMIT()
+        print("=",end="")
     print("\n")
     GV_FINISHED_COUNT[0] += 1
     return t,dstr
@@ -123,7 +127,7 @@ def getPostPages(suburl,fatherurl,postauthor):
             start = html.find(postdate_head_typeB)
             end = html.find(postdate_tail_typeB)
             if end < 0 or start < 0 :
-                print("NMT-ERRORS",end="")
+                print("-NMTERR-",end="")
                 postDate = "1996-10-30 22:58"
             date = html[start+len(postdate_head_typeB):end]
             html = html[end+len(postdate_tail_typeB):]
@@ -195,7 +199,7 @@ def getPostPages(suburl,fatherurl,postauthor):
             start = html.find(postdate_head_typeB)
             end = html.find(postdate_tail_typeB)
             if end < 0 or start < 0 :
-                print("no match for time A and B types")
+                print("-NMTERR-")
                 break
             date = html[start+len(postdate_head_typeB):end]
             html = html[end+len(postdate_tail_typeB):]
@@ -337,13 +341,17 @@ def DB_Insert(POSTOF,TIEBANAME,AUTHOR,CONTENT,DATE,REPLYTO,LINK):
     INS+= "\"" + POSTOF + "\",\"" + TIEBANAME +"\",\"" + AUTHOR + "\",\"" + CONTENT +"\",\"" + DATE +"\",\""+ REPLYTO + "\",\"" + LINK + "\")"
     #print(INS)
     try:
-        DBCUR.execute("SET names 'utf8mb4'")
+        #DBCUR.execute("SET names 'utf8mb4'")
         DBCUR.execute(INS)
-        DBCONN.commit()
+        #DBCONN.commit()
     except Exception as e:
         print("SQL-SYNTAX-ERROR",end="")
         return False 
     return True
+
+#提交数据更新
+def DB_COMMIT():
+    DBCONN.commit()
 
 #该函数用与从数据库中查询
 def DB_SELECT():
