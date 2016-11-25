@@ -177,3 +177,44 @@ def activeTimeAnaylize(authorname,days):
         hour+=1
     print("after add up all :\n\n",str(avgfeq))
     drawGraphic.linePlotGraphics('时间（小时）','发帖次数',xvalue,avgfeq,"【"+ authorname +'】的活跃时间段图(共 '+ str(len(FEQLIST)) +" 天数据)")
+
+#用户关系链
+def userCircle(username):
+    userlist = RFF.queryUserListbyReplyto(username)
+    statis = []
+    replygotsum = len(userlist)
+    for user in userlist:
+        exist = False
+        i=0
+        for pep in statis:
+            if pep[0] == user[0]:
+                statis[i][1]+=1
+                exist = True
+                break
+            i+=1
+        if exist ==False:
+            statis.append([user[0],0])
+            statis[len(statis)-1][1]+=1
+    statis = sorted(statis,key=lambda x:x[1],reverse=True)
+    i = 0
+    print("在",replygotsum,"条收到的回帖中，排名前15的互动对象如下：\n")
+    sum = 0
+    psum = 0
+    while i<15:
+        count = statis[i][1]
+        per = count/replygotsum*100
+        psum += per
+        sum += count
+        print(statis[i][0],":",count,"\t占",str(int(per))+"%")
+        i+=1
+    print("合计：",sum,"\t占",str(psum)+"%")
+    showInteractiveBetween(username,statis[0][0])
+    
+
+#显示某两位用户的交互帖子列表，用于分析
+def showInteractiveBetween(userA,userB):
+    a2blist = RFF.queryContentListbyAuthorToReplyto(userA,userB)
+    b2alist = RFF.queryContentListbyAuthorToReplyto(userB,userA)
+    print(a2blist)
+    MSG.printline22x35()
+    print(b2alist)

@@ -105,6 +105,28 @@ def queryWordContainListbyAuthor(author):
     datalist = DBCUR.fetchall()
     return datalist
 
+#从数据库查询回复给指定用户的所有其它用户列表
+#返回值：用户列表 
+# [ "1","2",....]
+def queryUserListbyReplyto(author):
+    SEL = "select  AUTHOR from `postdata`    where REPLYTO=\"" + author +"\" and AUTHOR!=\"" + author + "\""
+    DBCUR.execute("SET names 'utf8mb4'")
+    DBCUR.execute(SEL)
+    DBCONN.commit()
+    datalist = DBCUR.fetchall()
+    return datalist
+
+#从数据库查询指定用户回复给指定用户的帖子列表
+#返回值：贴子列表
+# [ "1","2",....]
+def queryContentListbyAuthorToReplyto(fromauthor,toauthor):
+    SEL = "select  CONTENT from `postdata`    where REPLYTO=\"" + toauthor +"\" and AUTHOR!=\"" + fromauthor + "\""
+    DBCUR.execute("SET names 'utf8mb4'")
+    DBCUR.execute(SEL)
+    DBCONN.commit()
+    datalist = DBCUR.fetchall()
+    return datalist
+
 #从数据库查询最大日期
 #返回值：一个最大日期
 def queryDatasourceLatestTime():

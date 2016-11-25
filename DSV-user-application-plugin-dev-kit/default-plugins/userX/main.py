@@ -19,8 +19,8 @@ def btnclick():
     SCALE = daysentry.get()
     scaletype = datascaleelem.get()
     print("authorname=",authorname,"\tSCALE=",SCALE,",\tscale type=",scaletype)
-    if scaletype == "显示用户关系链（开发中）":
-        pass
+    if scaletype == "显示用户关系链":
+        userX.userCircle(authorname)
     elif scaletype == "显示活跃度":
         userX.showLastDays(authorname,int(SCALE))
     elif scaletype == "显示语句关键词":
@@ -50,7 +50,7 @@ wordentry.pack(ipadx=4,ipady=4)
 Label(root,text="分析类型:",width=25,height=2).pack()
 variable = StringVar(root)
 datascaleelem = ttk.Combobox(root, textvariable=variable, values=["天", "月", "年"],state='readonly')
-datascaleelem["values"] = ("显示用户关系链（开发中）", "显示活跃度", "显示语句关键词","活跃时间段分析")  
+datascaleelem["values"] = ("显示用户关系链", "显示活跃度", "显示语句关键词","活跃时间段分析")  
 datascaleelem.current(1)  
 datascaleelem.pack()
 Label(root,text="要统计最近多少天的数据(<=0->all):",width=25,height=2).pack()
