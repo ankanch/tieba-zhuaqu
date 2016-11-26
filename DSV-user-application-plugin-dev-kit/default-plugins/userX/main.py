@@ -30,6 +30,20 @@ def btnclick():
     else:
         print("出现未知错误：无法正常选择处理类型！")
 
+def changetips(*args):
+    scaletype = datascaleelem.get()
+    if scaletype == "显示用户关系链":
+        tipslabeldata.set("下面请留空")
+    elif scaletype == "显示活跃度":
+        tipslabeldata.set("要统计最近多少天的数据(0->all):")
+    elif scaletype == "显示语句关键词":
+        tipslabeldata.set("要统计最近多少天的数据(0->all):")
+    elif scaletype == "活跃时间段分析":
+        tipslabeldata.set("要统计最近多少天的数据(0->all):")
+    else:
+        tipslabeldata.set("要统计最近多少天的数据(0->all):")
+    root.update()
+
 def centerWindow(rt):
     rt.update() # update window ,must do
     curWidth = rt.winfo_reqwidth() # get current width
@@ -43,6 +57,7 @@ def centerWindow(rt):
     
 data = StringVar(root)
 scale = IntVar(root)
+tipslabeldata = StringVar(root)
 Label(root,text="KCC数据分析模块 - 基本分析套件\n该模块用于显示指定词语的时间频率关系图",width=35,height=5).pack()
 Label(root,text="请输入要分析的用户的ID:",width=25,height=2).pack()
 wordentry = Entry(root,text="   ID",width=25,textvariable=data)
@@ -51,9 +66,12 @@ Label(root,text="分析类型:",width=25,height=2).pack()
 variable = StringVar(root)
 datascaleelem = ttk.Combobox(root, textvariable=variable, values=["天", "月", "年"],state='readonly')
 datascaleelem["values"] = ("显示用户关系链", "显示活跃度", "显示语句关键词","活跃时间段分析")  
-datascaleelem.current(1)  
+datascaleelem.current(1) 
+datascaleelem.bind("<<ComboboxSelected>>",changetips) 
 datascaleelem.pack()
-Label(root,text="要统计最近多少天的数据(<=0->all):",width=25,height=2).pack()
+tipslabeldata.set("要统计最近多少天的数据(<=0->all):")
+tipslabel = Label(root,textvariable=tipslabeldata,width=30,height=2)
+tipslabel.pack()
 daysentry = Entry(root,text="请输统计最近多少天的",width=25,relief=GROOVE,textvariable=scale)
 daysentry.pack(ipadx=4,ipady=4)
 Button(root, text="显示结果", width=15,relief=GROOVE,command=btnclick).pack(pady=16,ipadx=8,ipady=8)

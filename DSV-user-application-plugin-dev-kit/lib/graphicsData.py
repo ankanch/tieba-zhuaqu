@@ -58,7 +58,22 @@ def autolabel(rects):
         height = rect.get_height()
         plt.text(rect.get_x()+rect.get_width()/2., 1.03*height, '%s' % int(height))
 
-#barGraphics('等级','数量',['A','B','C','D','E','F'],[29,30,40,47,38,23],'测试图例')
-#linePlotGraphics("xLabel","yLabel",[1,2,3,4,5,6,7,8,9,10],[1.1,1.9,2.6,3.6,9.8,14,24,40,80,150],graphicTitle='图例')
-#scatterPlotsGraphics("xLabel","yLabel",[1,2,3,4,5,6,7,8,9,10],[1,11.9,2,6.3,6,9.8,14,4,8,5],graphicTitle='图例')
+#饼状图
+def pieGraphics(Labels,ValueList,graphicTitle='图例'):
+    colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral', "blue","green","cyan","magenta"]
+    maxdata = max(ValueList)
+    explode = []
+    for v in ValueList:
+        if v == maxdata:
+            explode.append(0.1)
+        else:
+            explode.append(0)
+    print(explode)
+    patches,l_text,p_text = plt.pie(ValueList, labels=Labels, colors=colors,autopct='%1.1f%%',explode=explode ,shadow=True, startangle=90)
+    for font in l_text:
+        font.set_fontproperties(FontProperties(fname=PATH_SUFFIX+'SIMLI.TTF'))
+    plt.title(graphicTitle,fontproperties=font_set,y=1.05)
+    # Set aspect ratio to be equal so that pie is drawn as a circle.
+    plt.axis('equal')
+    plt.show()
 

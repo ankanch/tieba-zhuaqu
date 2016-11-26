@@ -2,7 +2,13 @@
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties  
 import numpy
+import os
 font_set = FontProperties(fname=r"c:\\windows\\fonts\\simsun.ttc", size=15)  
+
+
+#重要全局变量
+PATH_SUFFIX = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+PATH_SUFFIX+="\\userX\\"   #插件根目录
 
 #基本柱形统计图
 def barGraphics(xLabel,yLabel,xValueList,yValueList,graphicTitle='图例',xWidth=0.5):
@@ -70,18 +76,19 @@ def autolabel(rects):
 
 #饼状图
 def pieGraphics(Labels,ValueList,graphicTitle='图例'):
-    # The slices will be ordered and plotted counter-clockwise.
-    #labels = 'Frogs', 'Hogs', 'Dogs', 'Logs'
-    #sizes = [15, 30, 45, 10]
     colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral', "blue","green","cyan","magenta"]
-    explode = (0, 0.1, 0, 0)  # only "explode" the 2nd slice (i.e. 'Hogs')
-
-    plt.pie(ValueList, labels=Labels, colors=colors,autopct='%1.1f%%', shadow=True, startangle=90)
+    maxdata = max(ValueList)
+    explode = []
+    for v in ValueList:
+        if v == maxdata:
+            explode.append(0.1)
+        else:
+            explode.append(0)
+    print(explode)
+    patches,l_text,p_text = plt.pie(ValueList, labels=Labels, colors=colors,autopct='%1.1f%%',explode=explode ,shadow=True, startangle=90)
+    for font in l_text:
+        font.set_fontproperties(FontProperties(fname=PATH_SUFFIX+'SIMLI.TTF'))
+    plt.title(graphicTitle,fontproperties=font_set,y=1.05)
     # Set aspect ratio to be equal so that pie is drawn as a circle.
     plt.axis('equal')
     plt.show()
-
-
-#barGraphics('等级','数量',['A','B','C','D','E','F'],[29,30,40,47,38,23],'测试图例')
-#linePlotGraphics("xLabel","yLabel",[1,2,3,4,5,6,7,8,9,10],[1.1,1.9,2.6,3.6,9.8,14,24,40,80,150],graphicTitle='图例')
-#scatterPlotsGraphics("xLabel","yLabel",[1,2,3,4,5,6,7,8,9,10],[1,11.9,2,6.3,6,9.8,14,4,8,5],graphicTitle='图例')

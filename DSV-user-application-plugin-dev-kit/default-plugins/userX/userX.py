@@ -197,10 +197,14 @@ def userCircle(username):
             statis[len(statis)-1][1]+=1
     statis = sorted(statis,key=lambda x:x[1],reverse=True)
     i = 0
-    print("在",replygotsum,"条收到的回帖中，排名前15的互动对象如下：\n")
+    print("在",replygotsum,"条收到的回帖中，排名前10的互动对象如下：\n")
     sum = 0
     psum = 0
-    while i<15:
+    label = []
+    value = []
+    while i<10:
+        label.append(statis[i][0])
+        value.append(statis[i][1])
         count = statis[i][1]
         per = count/replygotsum*100
         psum += per
@@ -208,7 +212,7 @@ def userCircle(username):
         print(statis[i][0],":",count,"\t占",str(int(per))+"%")
         i+=1
     print("合计：",sum,"\t占",str(psum)+"%")
-    showInteractiveBetween(username,statis[0][0])
+    drawGraphic.pieGraphics(label,value,"与"+ username +"互动密切的用户")
     
 
 #显示某两位用户的交互帖子列表，用于分析
