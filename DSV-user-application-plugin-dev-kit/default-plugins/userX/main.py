@@ -58,7 +58,7 @@ def centerWindow(rt):
 data = StringVar(root)
 scale = IntVar(root)
 tipslabeldata = StringVar(root)
-Label(root,text="KCC数据分析模块 - 基本分析套件\n该模块用于显示指定词语的时间频率关系图",width=35,height=5).pack()
+Label(root,text="KCC数据分析模块 - 基本分析套件\n该模块用于从贴吧用户的维度分析一些基本数据",width=35,height=5).pack()
 Label(root,text="请输入要分析的用户的ID:",width=25,height=2).pack()
 wordentry = Entry(root,text="   ID",width=25,textvariable=data)
 wordentry.pack(ipadx=4,ipady=4)
