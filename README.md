@@ -32,6 +32,7 @@ Visual Studio 2015
     task-manager：TaskManager任务管理服务器
     tieba-zhuaqu：KCrawler爬虫主体
     user-application：KCrawlerManager用户端管理软件KCrawlerController
+    DataAnalyzer：数据分析套件（从user-application中独立出来的）
 
 数据库结构见下图：
 
