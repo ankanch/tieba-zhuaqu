@@ -267,7 +267,6 @@ def downloadPage(psum,count,begURL,beg=0):
     if errored == False:
         print('【线程'+str(count)+'】<<<<<页面全部下载完成！')
         GV_DOWNLOAD_ALL[count-1] = True
-        #GV_FINISHED_COUNT[0] += 1
     else:
         axa = GV_ERROR_THREAD_DATA[ len( GV_ERROR_THREAD_DATA ) - 1 ]
 
@@ -283,7 +282,7 @@ def pocessDataList(GV_COUNT,begURL,tieba_name):
     NO_OUT = True
     exit_sum = 0
     GV_TIEBANAME = tieba_name
-    #DB_Init()
+    dlcachepath  = ".//dlcache//"
     while NO_OUT: 
         htmldata = readSavedHTML()
         if( htmldata != "ERROR" ) :
@@ -297,7 +296,9 @@ def pocessDataList(GV_COUNT,begURL,tieba_name):
                 if item == True:
                     x += 1
             print('下载完毕！','调试：x=',x,'GV_COUNT=',GV_COUNT)
-        if GV_FINISHED_COUNT[0] == GV_POCESSSUM[0]:
+        flist = os.listdir(dlcachepath)
+        #if GV_FINISHED_COUNT[0] == GV_POCESSSUM[0]:
+        if len(flist) == 0 and x == len(GV_DOWNLOAD_ALL):
             NO_OUT = False
             break
         #检测是否有线程异常，如果异常，则重新启动
@@ -337,13 +338,12 @@ def saveToFile(htmldata,threadcount,fnum):
 
 #该函数用于将数据插入数据库
 def DB_Insert(POSTOF,TIEBANAME,AUTHOR,CONTENT,DATE,REPLYTO,LINK):
-    INS = "INSERT INTO `postdata`(`POSTOF`, `TIEBANAME`, `AUTHOR`, `CONTENT`, `DATE`, `REPLYTO`, `LINK`) VALUES ("
+    INS = "INSERT INTO `testdb`(`POSTOF`, `TIEBANAME`, `AUTHOR`, `CONTENT`, `DATE`, `REPLYTO`, `LINK`) VALUES ("
+    #INS = "INSERT INTO `postdata`(`POSTOF`, `TIEBANAME`, `AUTHOR`, `CONTENT`, `DATE`, `REPLYTO`, `LINK`) VALUES ("
     INS+= "\"" + POSTOF + "\",\"" + TIEBANAME +"\",\"" + AUTHOR + "\",\"" + CONTENT +"\",\"" + DATE +"\",\""+ REPLYTO + "\",\"" + LINK + "\")"
     #print(INS)
     try:
-        #DBCUR.execute("SET names 'utf8mb4'")
         DBCUR.execute(INS)
-        #DBCONN.commit()
     except Exception as e:
         print("SQL-SYNTAX-ERROR",end="")
         return False 
