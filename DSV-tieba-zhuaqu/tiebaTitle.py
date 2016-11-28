@@ -371,3 +371,8 @@ def DB_UniqueCheck(postContent,author,date):
 
 def DB_clear():
     DBCONN.close()
+
+
+#下面的函数用于子处理函数的多线程模型
+def dispatchPocess():
+    pass
