@@ -3,7 +3,7 @@ import smtplib #加载smtplib模块
 from email.mime.text import MIMEText
 from email.utils import formataddr
 my_sender='kanchpybot@163.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
-my_sender_password = "XYZ2016python"  #发件人邮箱
+my_sender_password = "XYZ2017python"  #发件人邮箱
 #my_user='1075900121@qq.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
 
 #This function send mail use kanchpybot@163.com
