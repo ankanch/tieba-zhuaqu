@@ -13,7 +13,7 @@ type Job struct {
 	Success bool
 
 	// error message if unsuccess
-	errMsg string
+	ErrMsg string
 
 	//Job ID
 	ID uuid.UUID
@@ -23,8 +23,9 @@ type Job struct {
 
 	// sotres machine that processed this Job
 	// FIFO, last one must be either successed or failed,
-	//		 the others must be fail processing ones.
-	ProcFlow []uuid.UUID
+	//		 the others must be failed in processing this job.
+	// workers are arranged as uuid1->uuid2->uuid3->...->uuidn
+	ProcFlow string
 }
 
 //GetPage is a function to get a post webpage
@@ -32,11 +33,9 @@ func (j *Job) GetPage() *http.Response {
 	resp, err := http.Get(j.URL)
 	if err != nil {
 		j.Success = false
-		j.errMsg = ""
+		j.ErrMsg = ""
 		return nil
 	}
-	defer resp.Body.Close()
-
 	j.Success = true
 	return resp
 }

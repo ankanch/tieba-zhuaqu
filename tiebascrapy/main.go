@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	tiebascrapy "github.com/ankanch/tieba-zhuaqu/tiebascrapy/lib"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -11,6 +13,22 @@ func main() {
 
 	fmt.Println(tiebascrapy.GetUUIDString())
 
+	//create a job
+	j := tiebascrapy.Job{Success: false,
+		ErrMsg:   "",
+		ID:       tiebascrapy.GenerateUUID(),
+		URL:      "https://tieba.baidu.com/p/6230479485",
+		ProcFlow: tiebascrapy.GetUUIDString()}
+
+	tiebascrapy.WriteJobToFile(j)
+
+	//execute Job
+	resp := j.GetPage()
+	pdl, success := tiebascrapy.ParsePosts(resp)
+	if success == false {
+		log.Error("main:failed to parse post data ")
+	}
+	tiebascrapy.WritePostDataListToFile(pdl)
 }
 
 func initWorker() {
@@ -24,5 +42,18 @@ func initWorker() {
 	}
 	tiebascrapy.SetConfValue("worker", "WORKER_UUID", tiebascrapy.GetUUIDString())
 	tiebascrapy.SaveConfiguration()
+
+	//create dirs
+	if _, err := os.Stat("cache"); os.IsNotExist(err) {
+		os.Mkdir("cache", os.ModePerm)
+	}
+	if _, err := os.Stat("cache/jobs"); os.IsNotExist(err) {
+		os.Mkdir("cache/jobs", os.ModePerm)
+	}
+	if _, err := os.Stat("cache/postdata"); os.IsNotExist(err) {
+		os.Mkdir("cache/postdata", os.ModePerm)
+	}
+
+	//
 
 }

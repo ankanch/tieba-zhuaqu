@@ -1,3 +1,27 @@
 [worker]
-WORKER_UUID = f42a6f0c-da90-11e9-95dd-00155d01dd08
+WORKER_UUID = f6617c8b-daa4-11e9-97af-00155d01dd08
+
+[downloader]
+MAX_DOWNLOADER  = 
+GETPAGE_TIMEOUT = 
+
+[parser]
+MAX_PARSER = 
+
+[job]
+MAX_JOB_QUEUE   = 
+MAX_JOB_RETRIES = 
+
+[coop]
+COORDINATOR                    = 
+COORDINATOR_DISCOVERY          = 
+COORDINATOR_DISCOVERY_INTERVAL = 
+
+[datastore]
+USE_DATABASE = 
+DATA_STORE   = 
+DB_URL       = 
+DB_NAME      = 
+DB_USERNAME  = 
+DB_PASSWORD  = 
 

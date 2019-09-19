@@ -1,7 +1,9 @@
 package tiebascrapy
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"gopkg.in/ini.v1"
@@ -11,7 +13,7 @@ import (
 var workerConfigurationFile *ini.File
 
 //default values
-var defalutMap = map[string]interface{}{
+var defalutCfgMap = map[string]interface{}{
 	"WORKER_UUID":                    "",
 	"MAX_DOWNLOADER":                 4,
 	"MAX_PARSER":                     2,
@@ -48,7 +50,7 @@ func GetConfiguration() *ini.File {
 func GetConfStringValue(section string, key string) string {
 	v := workerConfigurationFile.Section(section).Key(key).String()
 	if v == "" {
-		return defalutMap[key].(string)
+		return defalutCfgMap[key].(string)
 	}
 	return v
 }
@@ -57,7 +59,7 @@ func GetConfStringValue(section string, key string) string {
 func GetConfIntValue(section string, key string) int {
 	v, err := workerConfigurationFile.Section("worker").Key("WORKER_UUID").Int()
 	if err != nil {
-		return defalutMap[key].(int)
+		return defalutCfgMap[key].(int)
 	}
 	return v
 }
@@ -66,7 +68,7 @@ func GetConfIntValue(section string, key string) int {
 func GetConfBoolValue(section string, key string) bool {
 	v, err := workerConfigurationFile.Section("worker").Key("WORKER_UUID").Bool()
 	if err != nil {
-		return defalutMap[key].(bool)
+		return defalutCfgMap[key].(bool)
 	}
 	return v
 }
@@ -74,4 +76,44 @@ func GetConfBoolValue(section string, key string) bool {
 //SetConfValue set conf value, convet to string before saving
 func SetConfValue(section string, key string, value string) {
 	workerConfigurationFile.Section(section).Key(key).SetValue(value)
+}
+
+//ReadJobFromFile read single job object from file
+func ReadJobFromFile(path string) Job {
+	file, _ := ioutil.ReadFile(path)
+	j := Job{}
+	_ = json.Unmarshal([]byte(file), &j)
+	return j
+}
+
+//ReadJobListFromFile read a list of jobs  from file
+func ReadJobListFromFile(path string) []Job {
+	file, _ := ioutil.ReadFile(path)
+	j := make([]Job, 1)
+	_ = json.Unmarshal([]byte(file), &j)
+	return j
+}
+
+//WriteJobToFile writes single job to file as json
+func WriteJobToFile(j Job) {
+	file, _ := json.MarshalIndent(j, "", " ")
+	_ = ioutil.WriteFile("cache/jobs/job.json", file, 0644)
+}
+
+//WriteJobListToFile writes list of jobs to file as json
+func WriteJobListToFile(js []Job) {
+	file, _ := json.MarshalIndent(js, "", " ")
+	_ = ioutil.WriteFile("cache/jobs/joblist.json", file, 0644)
+}
+
+//WritePostDataToFile writes a single PostData to file
+func WritePostDataToFile(pd PostData) {
+	file, _ := json.MarshalIndent(pd, "", " ")
+	_ = ioutil.WriteFile("cache/postdata/postdata.json", file, 0644)
+}
+
+//WritePostDataListToFile writes a list of PostData to file
+func WritePostDataListToFile(pdl []PostData) {
+	file, _ := json.MarshalIndent(pdl, "", " ")
+	_ = ioutil.WriteFile("cache/postdata/postdatalist.json", file, 0644)
 }
