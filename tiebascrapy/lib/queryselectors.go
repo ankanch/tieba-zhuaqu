@@ -24,6 +24,9 @@ const SelectorFloorLink = ""
 //SelectorNextPage
 const SelectorNextPage = ""
 
-const SelectorFuzzyFloorDataSelector = ""
-const SelectorPossibleFloorNum = ""
-const SelectorPossibleFloorDate = ""
+//SelectorPossibleFloorNum 
+const SelectorPossibleFloorNum = ".post-tail-wrap > span:nth-child(2)"
+//SelectorPossibleFloorDate
+const SelectorPossibleFloorDate = ".post-tail-wrap > span:nth-child(3)"
+//SelectorFuzzyFloorDataSelector
+const SelectorFuzzyFloorDataSelector = ".post-tail-wrap > span:nth-child(4)"

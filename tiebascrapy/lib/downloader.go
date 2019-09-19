@@ -18,6 +18,12 @@ type Job struct {
 	//Job ID
 	ID uuid.UUID
 
+	//Tieba name
+	TiebaName string
+
+	//posting name
+	PostName string
+
 	//Job url
 	URL string
 

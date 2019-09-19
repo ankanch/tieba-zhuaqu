@@ -10,6 +10,8 @@ import (
 
 // PostData sotres single reply in a post
 type PostData struct {
+	// what's the ID
+	PostID string
 
 	// which tieba this post belongs to
 	TiebaName string
@@ -37,7 +39,7 @@ type PostData struct {
 }
 
 //ParsePosts is a function to extract posts from downloaded webpage
-func ParsePosts(resp *http.Response) ([]PostData, bool) {
+func ParsePosts(job Job, resp *http.Response) ([]PostData, bool) {
 	doc, err := goquery.NewDocumentFromResponse(resp)
 	defer resp.Body.Close()
 	if err != nil {
@@ -46,9 +48,9 @@ func ParsePosts(resp *http.Response) ([]PostData, bool) {
 	}
 	//
 	parseFloorNumAndPostDate := func(s *goquery.Selection) (floorNum string, postDate string) {
-		v0 := s.Find(".post-tail-wrap > span:nth-child(2)").Text()
-		v1 := s.Find(".post-tail-wrap > span:nth-child(3)").Text()
-		v2 := s.Find(".post-tail-wrap > span:nth-child(4)").Text()
+		v0 := s.Find(SelectorPossibleFloorNum).Text()
+		v1 := s.Find(SelectorPossibleFloorDate).Text()
+		v2 := s.Find(SelectorFuzzyFloorDataSelector).Text()
 		if v2 == "" {
 			/* there are two types of post-tail-wrap:
 			*		1. with in-floor replies
@@ -67,14 +69,15 @@ func ParsePosts(resp *http.Response) ([]PostData, bool) {
 			floorNum, postDate := parseFloorNumAndPostDate(s)
 
 			pd := PostData{
-				TiebaName:  "",
+				PostID:     "",
+				TiebaName:  job.TiebaName,
 				FatherPost: "",
 				Author:     s.Find(SelectorFloorAuthor).Text(),
 				Content:    s.Find(SelectorFloorContent).Text(),
 				FloorNum:   floorNum,
 				PostDate:   postDate,
 				ReplyTO:    "",
-				PostLink:   "",
+				PostLink:   job.URL,
 			}
 			pdl = append(pdl, pd)
 			band := s.Find(".post-tail-wrap > span:nth-child(4)").Text()

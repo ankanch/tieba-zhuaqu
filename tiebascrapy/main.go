@@ -15,16 +15,18 @@ func main() {
 
 	//create a job
 	j := tiebascrapy.Job{Success: false,
-		ErrMsg:   "",
-		ID:       tiebascrapy.GenerateUUID(),
-		URL:      "https://tieba.baidu.com/p/6230479485",
-		ProcFlow: tiebascrapy.GetUUIDString()}
+		ErrMsg:    "",
+		ID:        tiebascrapy.GenerateUUID(),
+		TiebaName: "Dota2吧",
+		PostName:  "DOTA2性价比饰品搭配大全，希望大家用的上",
+		URL:       "https://tieba.baidu.com/p/6230479485",
+		ProcFlow:  tiebascrapy.GetUUIDString()}
 
 	tiebascrapy.WriteJobToFile(j)
 
 	//execute Job
 	resp := j.GetPage()
-	pdl, success := tiebascrapy.ParsePosts(resp)
+	pdl, success := tiebascrapy.ParsePosts(j, resp)
 	if success == false {
 		log.Error("main:failed to parse post data ")
 	}
