@@ -1,4 +1,13 @@
-package scrapylib
+package tiebascrapy
+
+import (
+	"net/http"
+
+	"github.com/PuerkitoBio/goquery"
+)
+
+//selectors for posts
+var postSelector = "#j_p_postlist > div"
 
 // PostData sotres single reply in a post
 type PostData struct {
@@ -26,7 +35,12 @@ type PostData struct {
 }
 
 //ParsePosts is a function to extract posts from downloaded webpage
-func ParsePosts(respBody []byte) ([]PostData, bool) {
-	bodyText := string(respBody)
+func ParsePosts(resp *http.Response) ([]PostData, bool) {
+	doc, err := goquery.NewDocumentFromResponse(resp)
+	if err != nil {
+		return nil, false
+	}
+	doc.Find(postSelector)
 
+	return nil, true
 }

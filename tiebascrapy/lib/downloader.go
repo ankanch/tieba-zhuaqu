@@ -1,7 +1,6 @@
-package scrapylib
+package tiebascrapy
 
 import (
-	"io/ioutil"
 	"net/http"
 
 	uuid "github.com/satori/go.uuid"
@@ -29,7 +28,7 @@ type Job struct {
 }
 
 //GetPage is a function to get a post webpage
-func (j *Job) GetPage() []byte {
+func (j *Job) GetPage() *http.Response {
 	resp, err := http.Get(j.URL)
 	if err != nil {
 		j.Success = false
@@ -38,13 +37,6 @@ func (j *Job) GetPage() []byte {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		j.Success = false
-		j.errMsg = ""
-		return nil
-	}
-
 	j.Success = true
-	return body
+	return resp
 }
