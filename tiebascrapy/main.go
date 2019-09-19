@@ -14,15 +14,15 @@ func main() {
 }
 
 func initWorker() {
-	tiebascrapy.loadConfiguration()
+	tiebascrapy.LoadConfiguration()
 
 	//load or create uuid
 	tiebascrapy.GenerateUUID()
-	wuuid := tiebascrapy.GetConfiguration().Section("worker").Key("WORKER_UUID").String()
+	wuuid := tiebascrapy.GetConfStringValue("worker", "WORKER_UUID")
 	if wuuid != "" {
 		tiebascrapy.SetUUIDFromString(wuuid)
 	}
-	tiebascrapy.GetConfiguration().Section("worker").Key("WORKER_UUID").SetValue((tiebascrapy.GetUUIDString()))
-	tiebascrapy.saveConfiguration()
+	tiebascrapy.SetConfValue("worker", "WORKER_UUID", tiebascrapy.GetUUIDString())
+	tiebascrapy.SaveConfiguration()
 
 }

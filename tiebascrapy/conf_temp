@@ -2,11 +2,11 @@
 WORKER_UUID= uuid_string
 
 [downloader]
-MAX_DOWNLOADER_COUNT= [numbers: 1,2,...,n]
+MAX_DOWNLOADER= [numbers: 1,2,...,n]
 GETPAGE_TIMEOUT= [numbers(seconds):1,2,...,n]
 
 [parser]
-MAX_PARSER_COUNT= [numbers:1,2,...,n]
+MAX_PARSER= [numbers:1,2,...,n]
 
 [job]
 MAX_JOB_QUEUE= [numbers:1,2,...,n]
