@@ -1,15 +1,30 @@
 [worker]
-WORKER_UUID=
-CONCURRENCY=
-GETPAGE_TIMEOUT=
+WORKER_UUID= uuid_string
+
+[downloader]
+MAX_DOWNLOADER_COUNT= [numbers: 1,2,...,n]
+GETPAGE_TIMEOUT= [numbers(seconds):1,2,...,n]
+
+[parser]
+MAX_PARSER_COUNT= [numbers:1,2,...,n]
+
+[job]
+MAX_JOB_QUEUE= [numbers:1,2,...,n]
+MAX_JOB_RETRIES= [numbers:1,2,...,n]
+
+
+[coop]
+COORDINATOR= ip_or_hostname_to_coordinator
+COORDINATOR_DISCOVERY= [TRUE,FALSE]
+COORDINATOR_DISCOVERY_INTERVAL= [number(seconds):1,2,...,n]
 
 
 [datastore]
-USE_DATABASE=[TRUE,FALSE]
+USE_DATABASE= [TRUE,FALSE]
+DATA_STORE= [SQL,CSV]
 
-DB_URL=
-DB_NAME=
-DB_USERNAME=
-DB_PASSWORD=
+DB_URL= url_to_database
+DB_NAME= database_name
+DB_USERNAME= database_username
+DB_PASSWORD= database_user_password
 
-DATA_STORE=[SQL,CSV]
