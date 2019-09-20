@@ -80,8 +80,8 @@ func ParsePosts(job Job, resp *http.Response) ([]PostData, bool) {
 				PostLink:   job.URL,
 			}
 			pdl = append(pdl, pd)
-			band := s.Find(".post-tail-wrap > span:nth-child(4)").Text()
-
+			//band := s.Find(".post-tail-wrap > span:nth-child(4)").Text()
+			band := s.AttrOr(SelectorFloorDataFieldAttr, "")
 			fmt.Printf("Review %d: %s\n", i, band)
 		})
 
